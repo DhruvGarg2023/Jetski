@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  githubId  String   @unique @map("github_id")
+  email     String   @unique
+  name      String?
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  projects  Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repositories RepositoryConnection[]
+
+  @@map("projects")
+}
+
+model RepositoryConnection {
+  id            String   @id @default(uuid()) @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  githubRepoId  String   @map("github_repo_id")
+  fullName      String   @map("full_name")
+  defaultBranch String   @default("main") @map("default_branch")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviews Review[]
+
+  @@unique([projectId, githubRepoId])
+  @@index([fullName])
+  @@index([projectId])
+  @@map("repository_connections")
+}
+
+enum ReviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum TargetType {
+  COMMIT
+  PR
+}
+
+model Review {
+  id         String       @id @default(uuid()) @db.Uuid
+  repoId     String       @map("repo_id") @db.Uuid
+  status     ReviewStatus @default(PENDING)
+  targetType TargetType   @map("target_type")
+  targetId   String       @map("target_id")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  repository RepositoryConnection @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  comments   ReviewComment[]
+  aiHistory  AiReviewHistory?
+
+  @@index([targetId])
+  @@index([repoId])
+  @@map("reviews")
+}
+
+enum Severity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model ReviewComment {
+  id         String   @id @default(uuid()) @db.Uuid
+  reviewId   String   @map("review_id") @db.Uuid
+  filePath   String   @map("file_path")
+  lineNumber Int?     @map("line_number")
+  comment    String
+  severity   Severity @default(INFO)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("review_comments")
+}
+
+model AiReviewHistory {
+  id               String   @id @default(uuid()) @db.Uuid
+  reviewId         String   @unique @map("review_id") @db.Uuid
+  promptTokens     Int      @map("prompt_tokens")
+  completionTokens Int      @map("completion_tokens")
+  modelUsed        String   @map("model_used")
+  rawResponse      Json     @map("raw_response")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("ai_review_history")
+}
