@@ -3,32 +3,53 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
+import { env } from './config/env.js';
 import healthRouter from './routes/health.route.js';
 import { errorHandler } from './middlewares/error.middleware.js';
+import { globalLimiter } from './middlewares/rateLimiter.middleware.js';
 import authRoutes from './components/auth/auth.routes.js';
 
 const app = express();
 
-// Security Middlewares
+// ─── Security Middlewares ────────────────────────────────────────────────────
+
+// Helmet — sets secure HTTP headers (XSS protection, no-sniff, HSTS, etc.)
 app.use(helmet());
-app.use(cors());
 
-// Body Parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// CORS — only allow requests from the frontend origin
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
-// HTTP Request Logging
+// Global rate limiter — 100 requests per 15 minutes per IP
+app.use(globalLimiter);
+
+// ─── Body Parsing ────────────────────────────────────────────────────────────
+
+// Limit JSON body size to 1MB to prevent denial-of-service via large payloads
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// ─── HTTP Request Logging ────────────────────────────────────────────────────
+
 app.use(
   morgan('combined', {
     stream: { write: (message) => logger.info(message.trim()) },
   })
 );
 
-// Routes
+// ─── Routes ──────────────────────────────────────────────────────────────────
+
 app.use('/api/v1/health', healthRouter);
 app.use('/api/auth', authRoutes);
 
-// Global Error Handler
+// ─── Global Error Handler ────────────────────────────────────────────────────
+
 app.use(errorHandler);
 
 export default app;
