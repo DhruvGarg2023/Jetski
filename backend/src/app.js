@@ -8,6 +8,7 @@ import healthRouter from './routes/health.route.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 import { globalLimiter } from './middlewares/rateLimiter.middleware.js';
 import authRoutes from './components/auth/auth.routes.js';
+import githubRoutes from './components/github/github.routes.js';
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use(
 
 app.use('/api/v1/health', healthRouter);
 app.use('/api/auth', authRoutes);
+app.use('/api/github', githubRoutes);
 
 // ─── Global Error Handler ────────────────────────────────────────────────────
 
