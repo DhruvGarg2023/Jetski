@@ -3,6 +3,7 @@ import aiService from '../../modules/ai/ai.service.js';
 import reviewRepository from '../../repositories/review.repository.js';
 import AppError from '../../utils/appError.js';
 import logger from '../../utils/logger.js';
+import socketService from '../../modules/socket/socket.service.js';
 
 class ReviewsService {
   /**
@@ -12,16 +13,21 @@ class ReviewsService {
     const { repoId, targetType, targetId, githubToken } = payload;
 
     logger.info(`Initiating review for ${targetType} ${targetId} on repo ${repoId}`);
+    
+    // Emit start event
+    socketService.emitToUser(userId, 'review:start', { targetId, targetType, repoId });
 
     // 1. Fetch the raw diff from GitHub
     let diff;
     try {
+      socketService.emitToUser(userId, 'review:progress', { message: 'Fetching diff from GitHub...' });
       if (targetType === 'COMMIT') {
         diff = await githubService.getCommitDiff(repoId, targetId, githubToken, userId);
       } else {
         throw new AppError('PR reviews are not fully implemented yet in this milestone', 400);
       }
     } catch (error) {
+      socketService.emitToUser(userId, 'review:error', { message: `Failed to fetch diff: ${error.message}` });
       throw new AppError(`Failed to fetch diff: ${error.message}`, error.statusCode || 500);
     }
 
@@ -31,18 +37,22 @@ class ReviewsService {
 
     // Optional: Check if diff is too large to prevent token explosion
     if (diff.length > 50000) { // Rough heuristic
+      socketService.emitToUser(userId, 'review:error', { message: 'The diff is too large for AI review.' });
       throw new AppError('The diff is too large for AI review. Please break it down.', 413);
     }
 
     // 2. Call the AI Service
     let aiResult;
     try {
+      socketService.emitToUser(userId, 'review:progress', { message: 'Analyzing code with AI...' });
       aiResult = await aiService.generateCodeReview(diff);
     } catch (error) {
+      socketService.emitToUser(userId, 'review:error', { message: `AI Review generation failed: ${error.message}` });
       throw new AppError(`AI Review generation failed: ${error.message}`, 502);
     }
 
     // 3. Save the results to the database atomically
+    socketService.emitToUser(userId, 'review:progress', { message: 'Saving results to database...' });
     const savedReview = await reviewRepository.createReviewWithComments(
       repoId,
       targetType,
@@ -53,7 +63,12 @@ class ReviewsService {
     logger.info(`Successfully saved review ${savedReview.id}`);
 
     // Fetch and return the fully populated review
-    return await reviewRepository.getReviewById(savedReview.id);
+    const finalReview = await reviewRepository.getReviewById(savedReview.id);
+    
+    // Emit complete event
+    socketService.emitToUser(userId, 'review:complete', finalReview);
+    
+    return finalReview;
   }
 
   /**
