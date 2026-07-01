@@ -10,6 +10,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CLIENT_URL: z.string().default('http://localhost:3000'),
+  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required for AI module'),
 });
 
 const _env = envSchema.safeParse(process.env);

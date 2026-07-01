@@ -6,7 +6,14 @@ import AppError from '../utils/appError.js';
  * If validation fails, a structured 400 error is returned immediately.
  */
 export const validate = (schema) => (req, res, next) => {
-  const result = schema.safeParse(req.body);
+  // Check if schema expects a full request object (body, query, params)
+  const isFullRequestSchema = schema.shape && (schema.shape.body || schema.shape.query || schema.shape.params);
+
+  const dataToValidate = isFullRequestSchema 
+    ? { body: req.body, query: req.query, params: req.params }
+    : req.body;
+
+  const result = schema.safeParse(dataToValidate);
 
   if (!result.success) {
     const errors = result.error.errors.map((err) => ({
@@ -21,7 +28,14 @@ export const validate = (schema) => (req, res, next) => {
     });
   }
 
-  // Replace req.body with the parsed (and potentially transformed) data
-  req.body = result.data;
+  // Replace req properties with parsed/transformed data
+  if (isFullRequestSchema) {
+    if (result.data.body) req.body = result.data.body;
+    if (result.data.query) req.query = result.data.query;
+    if (result.data.params) req.params = result.data.params;
+  } else {
+    req.body = result.data;
+  }
+  
   next();
 };

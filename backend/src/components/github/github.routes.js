@@ -8,7 +8,7 @@ import {
   getDiff 
 } from './github.controller.js';
 import { protect } from '../../middlewares/auth.middleware.js';
-import validate from '../../middlewares/validate.middleware.js';
+import { validate } from '../../middlewares/validate.middleware.js';
 import { connectRepoSchema, connectionIdParamSchema, diffParamSchema } from './github.validator.js';
 
 const router = express.Router();
