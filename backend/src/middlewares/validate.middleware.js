@@ -5,11 +5,11 @@ import AppError from '../utils/appError.js';
  * Accepts a Zod schema and returns Express middleware that validates req.body.
  * If validation fails, a structured 400 error is returned immediately.
  */
-export const validate = (schema) => (req, res, next) => {
+const validate = (schema) => (req, res, next) => {
   // Check if schema expects a full request object (body, query, params)
   const isFullRequestSchema = schema.shape && (schema.shape.body || schema.shape.query || schema.shape.params);
 
-  const dataToValidate = isFullRequestSchema 
+  const dataToValidate = isFullRequestSchema
     ? { body: req.body, query: req.query, params: req.params }
     : req.body;
 
@@ -36,6 +36,8 @@ export const validate = (schema) => (req, res, next) => {
   } else {
     req.body = result.data;
   }
-  
+
   next();
 };
+
+export default validate;

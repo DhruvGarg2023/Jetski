@@ -22,7 +22,7 @@ class GitHubClient {
         throw new AppError('GitHub API rate limit exceeded', 429);
       }
       if (status === 404) throw new AppError('GitHub resource not found', 404);
-      throw new AppError(`GitHub API Error: ${data.message || 'Unknown error'}`, status);
+      throw new AppError(`GitHub API Error: ${data?.message || 'Unknown error'}`, status);
     }
     throw new AppError('Failed to connect to GitHub API', 500);
   }
