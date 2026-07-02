@@ -1,5 +1,6 @@
 import AppError from '../../utils/appError.js';
 import logger from '../../utils/logger.js';
+import { auditLogger } from '../../utils/audit.util.js';
 import queueService from '../../modules/queue/queue.service.js';
 import reviewRepository from '../../repositories/review.repository.js';
 import socketService from '../../modules/socket/socket.service.js';
@@ -13,6 +14,8 @@ class ReviewsService {
 
     logger.info(`Initiating background review for ${targetType} ${targetId} on repo ${repoId}`);
     
+    auditLogger.log('REVIEW_TRIGGERED', userId, { repoId, targetType, targetId });
+
     // Emit start event immediately
     socketService.emitToUser(userId, 'review:start', { targetId, targetType, repoId });
 

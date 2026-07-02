@@ -1,8 +1,10 @@
 import geminiProvider from './providers/gemini.provider.js';
 import { buildReviewPrompt } from './prompts/review.prompt.js';
 import { aiReviewSchema } from './ai.validator.js';
+import { env } from '../../config/env.js';
 import AppError from '../../utils/appError.js';
 import logger from '../../utils/logger.js';
+import { measureLatency } from '../../utils/performance.util.js';
 
 class AIService {
   /**
@@ -38,7 +40,9 @@ class AIService {
         logger.info(`AI Review Attempt ${attempt + 1}/${maxRetries + 1}`);
         
         // 1. Call the AI Provider
-        const { rawResponse, promptTokens, completionTokens } = await geminiProvider.generateReview(prompt);
+        const { rawResponse, promptTokens, completionTokens } = await measureLatency('AI_API_GEMINI', async () => {
+          return await geminiProvider.generateReview(prompt);
+        });
         
         // 2. Clean the string
         const jsonString = this._cleanJsonResponse(rawResponse);

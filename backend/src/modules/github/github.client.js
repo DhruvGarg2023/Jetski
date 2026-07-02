@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AppError from '../../utils/appError.js';
+import { measureLatency } from '../../utils/performance.util.js';
 
 class GitHubClient {
   constructor() {
@@ -87,14 +88,38 @@ class GitHubClient {
 
   async getCommitDiff(token, owner, repo, ref) {
     try {
-      const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}/commits/${ref}`, {
-        headers: {
-          ...this._getHeaders(token),
-          Accept: 'application/vnd.github.v3.diff',
-        },
-        responseType: 'text',
+      return await measureLatency('GITHUB_API_GET_DIFF', async () => {
+        const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}/commits/${ref}`, {
+          headers: {
+            ...this._getHeaders(token),
+            Accept: 'application/vnd.github.v3.diff',
+          },
+          responseType: 'text',
+        });
+        return response.data;
       });
-      return response.data;
+    } catch (error) {
+      this._handleError(error);
+    }
+  }
+
+  async request(method, endpoint, token, data = null, additionalHeaders = {}) {
+    try {
+      const url = `${this.baseURL}${endpoint}`;
+      
+      return await measureLatency(`GITHUB_API_${method}`, async () => {
+        const response = await axios({
+          method,
+          url,
+          data,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            ...additionalHeaders,
+          },
+        });
+        return response.data;
+      });
     } catch (error) {
       this._handleError(error);
     }
