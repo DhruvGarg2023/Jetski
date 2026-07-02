@@ -12,6 +12,7 @@ import projectsRoutes from './components/projects/projects.routes.js';
 import githubRoutes from './components/github/github.routes.js';
 import reviewsRoutes from './components/reviews/reviews.routes.js';
 import queueRoutes from './modules/queue/queue.routes.js';
+import docsRoutes from './modules/docs/docs.routes.js';
 
 const app = express();
 
@@ -41,7 +42,6 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 import { requestIdMiddleware } from './middlewares/requestId.middleware.js';
 
-// ─── HTTP Request Logging ────────────────────────────────────────────────────
 
 app.use(requestIdMiddleware);
 
@@ -51,7 +51,6 @@ app.use(
   })
 );
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
 
 app.use('/api/v1/health', healthRouter);
 app.use('/api/auth', authRoutes);
@@ -59,8 +58,8 @@ app.use('/api/projects', projectsRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/queues', queueRoutes);
+app.use('/api-docs', docsRoutes);
 
-// ─── Global Error Handler ────────────────────────────────────────────────────
 
 app.use(errorHandler);
 
