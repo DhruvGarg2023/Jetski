@@ -8,11 +8,14 @@ class GitHubClient {
   }
 
   _getHeaders(token) {
-    return {
-      Authorization: `Bearer ${token}`,
+    const headers = {
       Accept: 'application/vnd.github.v3+json',
       'X-GitHub-Api-Version': '2022-11-28',
     };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
   }
 
   _handleError(error) {

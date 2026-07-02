@@ -17,3 +17,41 @@ export const getProjectsByUser = async (userId) => {
     },
   });
 };
+
+export const createProjectWithConnection = async (userId, name, githubRepoId, fullName, defaultBranch) => {
+  return prisma.project.create({
+    data: {
+      userId,
+      name,
+      repositories: {
+        create: {
+          githubRepoId,
+          fullName,
+          defaultBranch
+        }
+      }
+    },
+    include: {
+      repositories: true
+    }
+  });
+};
+
+export const getProjectById = async (userId, projectId) => {
+  return prisma.project.findFirst({
+    where: {
+      id: projectId,
+      userId
+    },
+    include: {
+      repositories: {
+        include: {
+          reviews: {
+            orderBy: { createdAt: 'desc' },
+            take: 5
+          }
+        }
+      }
+    }
+  });
+};
