@@ -10,6 +10,7 @@ import { globalLimiter } from './middlewares/rateLimiter.middleware.js';
 import authRoutes from './components/auth/auth.routes.js';
 import githubRoutes from './components/github/github.routes.js';
 import reviewsRoutes from './components/reviews/reviews.routes.js';
+import queueRoutes from './modules/queue/queue.routes.js';
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use('/api/v1/health', healthRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/reviews', reviewsRoutes);
+app.use('/api/queues', queueRoutes);
 
 // ─── Global Error Handler ────────────────────────────────────────────────────
 

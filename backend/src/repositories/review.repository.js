@@ -2,18 +2,38 @@ import prisma from '../config/prisma.js';
 
 class ReviewRepository {
   /**
-   * Creates a Review, ReviewComments, and AiReviewHistory atomically.
+   * Creates a pending Review entry
    */
-  async createReviewWithComments(repoId, targetType, targetId, aiResult) {
+  async createPendingReview(repoId, targetType, targetId) {
+    return prisma.review.create({
+      data: {
+        repoId,
+        targetType,
+        targetId,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  /**
+   * Updates the status of a review
+   */
+  async updateReviewStatus(reviewId, status) {
+    return prisma.review.update({
+      where: { id: reviewId },
+      data: { status },
+    });
+  }
+
+  /**
+   * Updates an existing review with comments and AI history atomically.
+   */
+  async updateReviewWithComments(reviewId, aiResult) {
     return prisma.$transaction(async (tx) => {
-      // 1. Create the base Review entry
-      const review = await tx.review.create({
-        data: {
-          repoId,
-          targetType, // 'COMMIT' or 'PR'
-          targetId,   // e.g., commit SHA or PR number
-          status: 'COMPLETED',
-        },
+      // 1. Update the base Review status
+      const review = await tx.review.update({
+        where: { id: reviewId },
+        data: { status: 'COMPLETED' },
       });
 
       // 2. Prepare Comments data

@@ -10,9 +10,9 @@ export const initiateReview = catchAsync(async (req, res) => {
 
   const review = await reviewsService.initiateReview(userId, payload);
 
-  res.status(201).json({
+  res.status(202).json({
     status: 'success',
-    message: 'Review completed successfully',
+    message: 'Review job accepted and processing in background',
     data: review
   });
 });
