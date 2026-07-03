@@ -66,13 +66,16 @@ enum TargetType {
 }
 
 model Review {
-  id         String       @id @default(uuid()) @db.Uuid
-  repoId     String       @map("repo_id") @db.Uuid
-  status     ReviewStatus @default(PENDING)
-  targetType TargetType   @map("target_type")
-  targetId   String       @map("target_id")
-  createdAt  DateTime     @default(now()) @map("created_at")
-  updatedAt  DateTime     @updatedAt @map("updated_at")
+  id           String       @id @default(uuid()) @db.Uuid
+  repoId       String       @map("repo_id") @db.Uuid
+  status       ReviewStatus @default(PENDING)
+  targetType   TargetType   @map("target_type")
+  targetId     String       @map("target_id")
+  summary      String?
+  overallScore Int?         @map("overall_score")
+  grade        String?
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
 
   repository RepositoryConnection @relation(fields: [repoId], references: [id], onDelete: Cascade)
   comments   ReviewComment[]
@@ -85,18 +88,38 @@ model Review {
 
 enum Severity {
   INFO
-  WARNING
+  LOW
+  MEDIUM
+  HIGH
   CRITICAL
 }
 
+enum ReviewCategory {
+  Security
+  Performance
+  Bug
+  Readability
+  Maintainability
+  Best_Practice
+  Code_Style
+  Scalability
+  Reliability
+  Documentation
+}
+
 model ReviewComment {
-  id         String   @id @default(uuid()) @db.Uuid
-  reviewId   String   @map("review_id") @db.Uuid
-  filePath   String   @map("file_path")
-  lineNumber Int?     @map("line_number")
-  comment    String
-  severity   Severity @default(INFO)
-  createdAt  DateTime @default(now()) @map("created_at")
+  id          String         @id @default(uuid()) @db.Uuid
+  reviewId    String         @map("review_id") @db.Uuid
+  filePath    String         @map("file_path")
+  lineNumber  Int?           @map("line_number")
+  category    ReviewCategory @default(Bug)
+  title       String         @default("Issue")
+  comment     String
+  suggestion  String         @default("")
+  codeSnippet String?        @map("code_snippet")
+  severity    Severity       @default(INFO)
+  confidence  Float?
+  createdAt   DateTime       @default(now()) @map("created_at")
 
   review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 

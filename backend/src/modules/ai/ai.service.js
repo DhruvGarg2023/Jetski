@@ -63,12 +63,12 @@ class AIService {
 
         // Success!
         return {
-          comments: validation.data,
+          ...validation.data,
           usage: {
             promptTokens,
             completionTokens,
             modelUsed: 'gemini-2.5-flash',
-            rawResponse: parsedData // Storing the clean parsed array
+            rawResponse: parsedData // Storing the clean parsed object
           }
         };
 

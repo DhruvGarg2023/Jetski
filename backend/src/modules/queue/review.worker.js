@@ -27,7 +27,7 @@ export const processReviewJob = async (jobData) => {
       throw new Error('The requested diff is empty or does not exist.');
     }
 
-    if (diff.length > 50000) { // Rough heuristic
+    if (diff.length > 1000000) { // Gemini 1.5 Flash supports 1M+ tokens
       throw new Error('The diff is too large for AI review. Please break it down.');
     }
 
@@ -48,7 +48,7 @@ export const processReviewJob = async (jobData) => {
     
     return { success: true, reviewId };
   } catch (error) {
-    logger.error(`Failed to process review job ${reviewId}:`, error);
+    logger.error(error, `Failed to process review job ${reviewId}`);
     
     // Mark the review as FAILED in the DB
     await reviewRepository.updateReviewStatus(reviewId, 'FAILED');

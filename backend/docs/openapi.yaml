@@ -127,7 +127,117 @@ paths:
       responses:
         '201':
           description: Code review requested and queued
+  /api/reviews/{id}:
+    get:
+      summary: Get details of a specific AI review
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The Review ID
+      responses:
+        '200':
+          description: Successfully fetched the review
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Review'
+  /api/reviews/repo/{repoId}:
+    get:
+      summary: Get all reviews for a repository
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: repoId
+          required: true
+          schema:
+            type: string
+          description: The Repository ID
+      responses:
+        '200':
+          description: Successfully fetched repository reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
 components:
+  schemas:
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+        repoId:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, COMPLETED, FAILED]
+        targetType:
+          type: string
+          enum: [COMMIT, PR]
+        targetId:
+          type: string
+        summary:
+          type: string
+        overallScore:
+          type: integer
+        grade:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewComment'
+    ReviewComment:
+      type: object
+      properties:
+        id:
+          type: string
+        filePath:
+          type: string
+        lineNumber:
+          type: integer
+        category:
+          type: string
+        title:
+          type: string
+        comment:
+          type: string
+        suggestion:
+          type: string
+        codeSnippet:
+          type: string
+        severity:
+          type: string
+        confidence:
+          type: number
+          format: float
+        createdAt:
+          type: string
+          format: date-time
   securitySchemes:
     bearerAuth:
       type: http

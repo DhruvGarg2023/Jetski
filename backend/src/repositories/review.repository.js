@@ -30,10 +30,15 @@ class ReviewRepository {
    */
   async updateReviewWithComments(reviewId, aiResult) {
     return prisma.$transaction(async (tx) => {
-      // 1. Update the base Review status
+      // 1. Update the base Review status and save new metadata fields
       const review = await tx.review.update({
         where: { id: reviewId },
-        data: { status: 'COMPLETED' },
+        data: { 
+          status: 'COMPLETED',
+          summary: aiResult.summary,
+          overallScore: aiResult.overallScore,
+          grade: aiResult.grade,
+        },
       });
 
       // 2. Prepare Comments data
@@ -42,8 +47,13 @@ class ReviewRepository {
           reviewId: review.id,
           filePath: comment.filePath,
           lineNumber: comment.lineNumber || null,
+          category: comment.category,
+          title: comment.title,
           comment: comment.comment,
+          suggestion: comment.suggestion,
+          codeSnippet: comment.codeSnippet || null,
           severity: comment.severity,
+          confidence: comment.confidence || null,
         }));
 
         await tx.reviewComment.createMany({
