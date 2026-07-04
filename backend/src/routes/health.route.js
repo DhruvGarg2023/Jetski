@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
   try {
     // 1. Check Database Health
     await prisma.$queryRaw`SELECT 1`;
-    
+
     // 2. Check Queue Health
     await queueService.boss.getQueue('code-review');
 

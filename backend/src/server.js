@@ -8,7 +8,7 @@ import queueService from './modules/queue/queue.service.js';
 const startServer = async () => {
   try {
     const server = http.createServer(app);
-    
+
     // Initialize Socket.IO
     socketService.init(server);
 

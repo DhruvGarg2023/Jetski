@@ -10,14 +10,18 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CLIENT_URL: z.string().default('http://localhost:3000'),
+  CORS_ORIGIN: z.string().default('http://localhost:3000'),
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required for AI module'),
+  GITHUB_ACCESS_TOKEN: z.string().min(1, 'GITHUB_ACCESS_TOKEN is required for GitHub integration').optional(),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  REDIS_URL: z.string().url().optional(), // Optional placeholder for future scalability
 });
 
 const _env = envSchema.safeParse(process.env);
 
 if (!_env.success) {
   console.error('❌ Invalid environment variables:');
-  console.error(_env.error.format());
+  console.error(JSON.stringify(_env.error.format(), null, 2));
   process.exit(1);
 }
 
