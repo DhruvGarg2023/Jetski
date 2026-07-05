@@ -5,7 +5,19 @@ import { processReviewJob } from './review.worker.js';
 
 class QueueService {
   constructor() {
-    this.boss = new PgBoss(env.DIRECT_DATABASE_URL || env.DATABASE_URL);
+    const dbUrl = env.DIRECT_DATABASE_URL || env.DATABASE_URL;
+    const isProd = env.NODE_ENV === 'production';
+    
+    const config = {
+      connectionString: dbUrl,
+    };
+
+    // Many cloud providers (Neon, Render, Supabase) require SSL
+    if (isProd && !dbUrl.includes('localhost')) {
+      config.ssl = { rejectUnauthorized: false };
+    }
+
+    this.boss = new PgBoss(config);
     
     this.boss.on('error', (error) => {
       console.error('pg-boss error details:', error);
@@ -30,7 +42,7 @@ class QueueService {
       });
 
     } catch (error) {
-      logger.error('Failed to start PgBoss queue service:', error);
+      logger.error(error, 'Failed to start PgBoss queue service:');
       throw error;
     }
   }

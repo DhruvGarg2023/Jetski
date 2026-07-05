@@ -23,7 +23,7 @@ const startServer = async () => {
     });
 
   } catch (error) {
-    logger.error('Error starting server:', error);
+    logger.error(error, 'Error starting server:');
     process.exit(1);
   }
 };
@@ -74,7 +74,7 @@ const gracefulShutdown = async (signal) => {
     }, 500); // Increased to 500ms for safety
   } catch (error) {
     console.error('[Graceful Shutdown] Error:', error);
-    logger.error('Error during graceful shutdown:', error);
+    logger.error(error, 'Error during graceful shutdown:');
     setTimeout(() => process.exit(1), 500);
   }
 };
