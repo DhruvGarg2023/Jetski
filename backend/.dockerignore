@@ -7,7 +7,6 @@ Dockerfile
 .env
 tests/
 coverage/
-docs/
 README.md
 vitest.config.js
 .prettierrc

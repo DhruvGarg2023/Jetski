@@ -7,6 +7,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().default('5000'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  DIRECT_DATABASE_URL: z.string().min(1).optional(), // Direct connection for migrations (bypasses pooler)
   JWT_SECRET: z.string().min(10, 'JWT_SECRET must be at least 10 characters'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CLIENT_URL: z.string().default('http://localhost:3000'),

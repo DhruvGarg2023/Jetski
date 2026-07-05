@@ -11,7 +11,14 @@
     "lint:fix": "eslint src/**/*.js --fix",
     "format": "prettier --write \"src/**/*.js\"",
     "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:prod": "node scripts/migrate.js",
+    "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f backend",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -42,5 +49,8 @@
     "prisma": "^5.10.2",
     "supertest": "^7.2.2",
     "vitest": "^4.1.9"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
