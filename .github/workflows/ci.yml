@@ -38,6 +38,11 @@ jobs:
 
       - name: Run Unit & Integration Tests
         run: npm run test
+        env:
+          DATABASE_URL: 'postgresql://mockuser:mockpass@localhost:5432/mockdb'
+          JWT_SECRET: 'mock_jwt_secret_must_be_10_chars'
+          GEMINI_API_KEY: 'mock_gemini_api_key'
+          NODE_ENV: 'test'
 
   docker-build:
     name: Build Docker Image
