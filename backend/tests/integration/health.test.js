@@ -9,20 +9,24 @@ vi.mock('../../src/config/prisma.js', () => ({
   default: {
     $queryRaw: vi.fn(),
   },
+  validateDatabaseConnection: vi.fn(),
 }));
 
 vi.mock('../../src/modules/queue/queue.service.js', () => ({
   default: {
     boss: {
       getQueue: vi.fn(),
+      isStarted: true
     },
   },
 }));
 
+import { validateDatabaseConnection } from '../../src/config/prisma.js';
+
 describe('Health API Integration Tests', () => {
   it('GET /api/v1/health should return 200 and healthy status when DB and Queue are up', async () => {
     // Arrange
-    prisma.$queryRaw.mockResolvedValue([{ '?column?': 1 }]);
+    validateDatabaseConnection.mockResolvedValue(true);
     queueService.boss.getQueue.mockResolvedValue({});
 
     // Act
@@ -32,13 +36,13 @@ describe('Health API Integration Tests', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe('success');
     expect(res.body.message).toBe('System is healthy');
-    expect(res.body.database).toBe('connected');
-    expect(res.body.queue).toBe('connected');
+    expect(res.body.checks.database).toBe('connected');
+    expect(res.body.checks.queue).toBe('connected');
   });
 
   it('GET /api/v1/health should return 503 when DB is down', async () => {
     // Arrange
-    prisma.$queryRaw.mockRejectedValue(new Error('DB Connection Failed'));
+    validateDatabaseConnection.mockResolvedValue(false);
 
     // Act
     const res = await request(app).get('/api/v1/health');
@@ -46,6 +50,6 @@ describe('Health API Integration Tests', () => {
     // Assert
     expect(res.statusCode).toBe(503);
     expect(res.body.status).toBe('fail');
-    expect(res.body.message).toBe('System is unhealthy');
+    expect(res.body.message).toBe('System is degraded');
   });
 });

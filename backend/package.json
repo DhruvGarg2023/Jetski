@@ -36,6 +36,7 @@
     "morgan": "^1.10.0",
     "pg-boss": "^12.24.1",
     "pino": "^8.19.0",
+    "pino-roll": "^4.0.0",
     "socket.io": "^4.8.3",
     "swagger-ui-express": "^5.0.1",
     "yaml": "^2.9.0",

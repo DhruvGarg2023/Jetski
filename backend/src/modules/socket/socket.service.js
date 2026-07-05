@@ -60,6 +60,20 @@ class SocketService {
       logger.warn(`Socket.IO not initialized when trying to emit '${event}'`);
     }
   }
+
+  /**
+   * Closes the Socket.IO server during graceful shutdown
+   */
+  async close() {
+    if (this.io) {
+      return new Promise((resolve) => {
+        this.io.close(() => {
+          logger.info('Socket.IO server closed');
+          resolve();
+        });
+      });
+    }
+  }
 }
 
 export default new SocketService();

@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
 import { env } from './config/env.js';
+import { helmetConfig, corsConfig, trustProxy } from './config/security.js';
+import { requestIdMiddleware } from './middlewares/requestId.middleware.js';
 import healthRouter from './routes/health.route.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 import { globalLimiter } from './middlewares/rateLimiter.middleware.js';
@@ -16,23 +18,29 @@ import docsRoutes from './modules/docs/docs.routes.js';
 
 const app = express();
 
+// ─── Trusted Proxy ───────────────────────────────────────────────────────────
+// Required for correct client IP resolution behind reverse proxies
+// (Render, Nginx, AWS ALB). Without this, rate limiting and logging
+// would see the proxy's IP instead of the real client IP.
+app.set('trust proxy', trustProxy);
+
 // ─── Security Middlewares ────────────────────────────────────────────────────
 
-// Helmet — sets secure HTTP headers (XSS protection, no-sniff, HSTS, etc.)
-app.use(helmet());
+// Helmet — sets secure HTTP headers (CSP, HSTS, X-Frame-Options, etc.)
+// Configuration adapts per environment via security.js
+app.use(helmet(helmetConfig));
 
-// CORS — only allow requests from the frontend origin
-app.use(
-  cors({
-    origin: env.CLIENT_URL,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+// CORS — controls which origins can make API requests.
+// Production: whitelist from CORS_ORIGIN env var (comma-separated).
+// Development: allows CLIENT_URL for convenience.
+app.use(cors(corsConfig));
 
-// Global rate limiter — 100 requests per 15 minutes per IP
+// Global rate limiter — environment-aware limits from security.js
 app.use(globalLimiter);
+
+// ─── Request Identification ──────────────────────────────────────────────────
+// Must come before body parsing and logging so every log entry has a request ID.
+app.use(requestIdMiddleware);
 
 // ─── Body Parsing ────────────────────────────────────────────────────────────
 
@@ -40,10 +48,7 @@ app.use(globalLimiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-import { requestIdMiddleware } from './middlewares/requestId.middleware.js';
-
-
-app.use(requestIdMiddleware);
+// ─── Request Logging ─────────────────────────────────────────────────────────
 
 app.use(
   morgan(':remote-addr - :remote-user [:date[clf]] "[Req: :req[x-request-id]] :method :url HTTP/:http-version" :status :res[content-length] - :response-time ms', {
@@ -51,6 +56,7 @@ app.use(
   })
 );
 
+// ─── Routes ──────────────────────────────────────────────────────────────────
 
 app.use('/api/v1/health', healthRouter);
 app.use('/api/auth', authRoutes);
@@ -60,7 +66,9 @@ app.use('/api/reviews', reviewsRoutes);
 app.use('/api/queues', queueRoutes);
 app.use('/api-docs', docsRoutes);
 
-
+// ─── Error Handler ───────────────────────────────────────────────────────────
+// Must be the last middleware — catches all unhandled errors.
 app.use(errorHandler);
 
 export default app;
+

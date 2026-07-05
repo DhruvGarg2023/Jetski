@@ -1,26 +1,92 @@
 import { Router } from 'express';
 import { env } from '../config/env.js';
-import prisma from '../config/prisma.js';
+import { validateDatabaseConnection } from '../config/prisma.js';
 import queueService from '../modules/queue/queue.service.js';
 import logger from '../utils/logger.js';
+import axios from 'axios';
 
 const router = Router();
 
+// ─── Health Checks ───────────────────────────────────────────────────────────
+
+// 1. Database Health
+router.get('/database', async (req, res) => {
+  const isDbConnected = await validateDatabaseConnection();
+  if (isDbConnected) {
+    return res.status(200).json({ status: 'up', service: 'database' });
+  }
+  return res.status(503).json({ status: 'down', service: 'database' });
+});
+
+// 2. Queue Health
+router.get('/queue', async (req, res) => {
+  try {
+    // Check if the boss instance is ready and we can access a queue
+    if (queueService.boss && queueService.boss.isStarted) {
+       await queueService.boss.getQueue('code-review');
+       return res.status(200).json({ status: 'up', service: 'queue' });
+    }
+    return res.status(503).json({ status: 'down', service: 'queue', error: 'Queue service not started' });
+  } catch (error) {
+    logger.error('Queue health check failed', error);
+    return res.status(503).json({ status: 'down', service: 'queue', error: error.message });
+  }
+});
+
+// 3. AI Module Health
+router.get('/ai', (req, res) => {
+  // Validate if GEMINI API Key is present in the environment
+  const isConfigured = !!env.GEMINI_API_KEY;
+  if (isConfigured) {
+    return res.status(200).json({ status: 'up', service: 'ai' });
+  }
+  return res.status(503).json({ status: 'down', service: 'ai', error: 'Missing API Key' });
+});
+
+// 4. GitHub Module Health
+router.get('/github', async (req, res) => {
+  try {
+    // Ping GitHub public API to verify outbound network connectivity
+    const response = await axios.get('https://api.github.com/zen', {
+      timeout: 5000,
+    });
+    if (response.status === 200) {
+      return res.status(200).json({ status: 'up', service: 'github', message: response.data });
+    }
+    return res.status(503).json({ status: 'down', service: 'github' });
+  } catch (error) {
+    logger.error('GitHub health check failed', error.message);
+    return res.status(503).json({ status: 'down', service: 'github', error: error.message });
+  }
+});
+
+// 5. Comprehensive Health (All Systems)
 router.get('/', async (req, res) => {
   try {
-    // 1. Check Database Health
-    await prisma.$queryRaw`SELECT 1`;
+    const isDbConnected = await validateDatabaseConnection();
+    let isQueueConnected = false;
+    
+    try {
+      if (queueService.boss && queueService.boss.isStarted) {
+        await queueService.boss.getQueue('code-review');
+        isQueueConnected = true;
+      }
+    } catch (e) {
+      isQueueConnected = false;
+    }
 
-    // 2. Check Queue Health
-    await queueService.boss.getQueue('code-review');
+    const isSystemHealthy = isDbConnected && isQueueConnected;
 
-    res.status(200).json({
-      status: 'success',
-      message: 'System is healthy',
+    res.status(isSystemHealthy ? 200 : 503).json({
+      status: isSystemHealthy ? 'success' : 'fail',
+      message: isSystemHealthy ? 'System is healthy' : 'System is degraded',
       timestamp: new Date().toISOString(),
       environment: env.NODE_ENV,
-      database: 'connected',
-      queue: 'connected'
+      checks: {
+        database: isDbConnected ? 'connected' : 'disconnected',
+        queue: isQueueConnected ? 'connected' : 'disconnected',
+        ai: !!env.GEMINI_API_KEY ? 'configured' : 'missing_config',
+      }
     });
   } catch (error) {
     logger.error('Health check failed', error);
