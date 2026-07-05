@@ -5,7 +5,7 @@ import { processReviewJob } from './review.worker.js';
 
 class QueueService {
   constructor() {
-    this.boss = new PgBoss(env.DATABASE_URL);
+    this.boss = new PgBoss(env.DIRECT_DATABASE_URL || env.DATABASE_URL);
     
     this.boss.on('error', (error) => {
       console.error('pg-boss error details:', error);
