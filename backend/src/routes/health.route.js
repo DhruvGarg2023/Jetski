@@ -85,7 +85,7 @@ router.get('/', async (req, res) => {
       checks: {
         database: isDbConnected ? 'connected' : 'disconnected',
         queue: isQueueConnected ? 'connected' : 'disconnected',
-        ai: !!env.GEMINI_API_KEY ? 'configured' : 'missing_config',
+        ai: env.GEMINI_API_KEY ? 'configured' : 'missing_config',
       }
     });
   } catch (error) {

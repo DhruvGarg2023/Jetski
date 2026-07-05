@@ -1,4 +1,3 @@
-import AppError from '../utils/appError.js';
 
 /**
  * Generic Zod validation middleware factory.
