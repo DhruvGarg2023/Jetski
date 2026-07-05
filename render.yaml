@@ -6,9 +6,9 @@ services:
   - type: web
     name: jetski-backend
     env: docker
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./Dockerfile
     dockerContext: ./backend
-    region: oregon # or your preferred region (e.g. frankfurt, ohio, singapore)
+    rootDir: backend
     plan: starter # Starter plan minimum for pg-boss and general API workloads
     healthCheckPath: /api/v1/health
     
