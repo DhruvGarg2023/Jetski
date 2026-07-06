@@ -33,12 +33,22 @@ class QueueService {
       // if the worker starts polling before the very first job is sent.
       await this.boss.createQueue('code-review');
 
-      // Register workers (pg-boss natively passes an array of jobs)
-      await this.boss.work('code-review', async (jobs) => {
-        for (const job of jobs) {
+      // Register workers with concurrency optimizations
+      await this.boss.work('code-review', {
+        teamSize: 5,        // Number of workers
+        teamConcurrency: 5, // Concurrent jobs per worker
+        batchSize: 5,       // Fetch 5 jobs at once
+      }, async (jobs) => {
+        // Process jobs entirely in parallel instead of a sequential for loop
+        await Promise.all(jobs.map(async (job) => {
           logger.info(`Processing code-review job: ${job.id}`);
-          await processReviewJob(job.data);
-        }
+          try {
+            await processReviewJob(job.data);
+          } catch (error) {
+            logger.error(`Error in concurrent review job ${job.id}: ${error.message}`);
+            // Don't throw here, otherwise Promise.all fails fast and cancels other parallel jobs
+          }
+        }));
       });
 
     } catch (error) {

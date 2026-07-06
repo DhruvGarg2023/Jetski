@@ -1,10 +1,15 @@
 import axios from 'axios';
+import https from 'https';
 import AppError from '../../utils/appError.js';
 import { measureLatency } from '../../utils/performance.util.js';
 
 class GitHubClient {
   constructor() {
     this.baseURL = 'https://api.github.com';
+    this.client = axios.create({
+      baseURL: this.baseURL,
+      httpsAgent: new https.Agent({ keepAlive: true, maxSockets: 50 }),
+    });
   }
 
   _getHeaders(token) {
@@ -33,7 +38,7 @@ class GitHubClient {
 
   async getRepositories(token) {
     try {
-      const response = await axios.get(`${this.baseURL}/user/repos`, {
+      const response = await this.client.get('/user/repos', {
         headers: this._getHeaders(token),
         params: { sort: 'updated', per_page: 100 },
       });
@@ -45,7 +50,7 @@ class GitHubClient {
 
   async getRepository(token, owner, repo) {
     try {
-      const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}`, {
+      const response = await this.client.get(`/repos/${owner}/${repo}`, {
         headers: this._getHeaders(token),
       });
       return response.data;
@@ -56,7 +61,7 @@ class GitHubClient {
 
   async getBranches(token, owner, repo) {
     try {
-      const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}/branches`, {
+      const response = await this.client.get(`/repos/${owner}/${repo}/branches`, {
         headers: this._getHeaders(token),
       });
       return response.data;
@@ -67,7 +72,7 @@ class GitHubClient {
 
   async getCommits(token, owner, repo, branch = 'main') {
     try {
-      const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}/commits`, {
+      const response = await this.client.get(`/repos/${owner}/${repo}/commits`, {
         headers: this._getHeaders(token),
         params: { sha: branch, per_page: 30 },
       });
@@ -79,7 +84,7 @@ class GitHubClient {
 
   async getPullRequests(token, owner, repo) {
     try {
-      const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}/pulls`, {
+      const response = await this.client.get(`/repos/${owner}/${repo}/pulls`, {
         headers: this._getHeaders(token),
         params: { state: 'open', sort: 'updated', direction: 'desc' },
       });
@@ -92,7 +97,7 @@ class GitHubClient {
   async getCommitDiff(token, owner, repo, ref) {
     try {
       return await measureLatency('GITHUB_API_GET_DIFF', async () => {
-        const response = await axios.get(`${this.baseURL}/repos/${owner}/${repo}/commits/${ref}`, {
+        const response = await this.client.get(`/repos/${owner}/${repo}/commits/${ref}`, {
           headers: {
             ...this._getHeaders(token),
             Accept: 'application/vnd.github.v3.diff',
@@ -108,12 +113,10 @@ class GitHubClient {
 
   async request(method, endpoint, token, data = null, additionalHeaders = {}) {
     try {
-      const url = `${this.baseURL}${endpoint}`;
-      
       return await measureLatency(`GITHUB_API_${method}`, async () => {
-        const response = await axios({
+        const response = await this.client({
           method,
-          url,
+          url: endpoint,
           data,
           headers: {
             Authorization: `Bearer ${token}`,

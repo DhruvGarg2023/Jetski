@@ -16,6 +16,8 @@ import reviewsRoutes from './components/reviews/reviews.routes.js';
 import queueRoutes from './modules/queue/queue.routes.js';
 import docsRoutes from './modules/docs/docs.routes.js';
 
+import compression from 'compression';
+
 const app = express();
 
 // ─── Trusted Proxy ───────────────────────────────────────────────────────────
@@ -23,6 +25,9 @@ const app = express();
 // (Render, Nginx, AWS ALB). Without this, rate limiting and logging
 // would see the proxy's IP instead of the real client IP.
 app.set('trust proxy', trustProxy);
+
+// ─── Response Compression ────────────────────────────────────────────────────
+app.use(compression());
 
 // ─── Security Middlewares ────────────────────────────────────────────────────
 

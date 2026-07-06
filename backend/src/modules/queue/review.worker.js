@@ -5,6 +5,25 @@ import socketService from '../../modules/socket/socket.service.js';
 import logger from '../../utils/logger.js';
 
 /**
+ * Splits a raw git diff string into an array of individual file diffs
+ */
+const splitDiffIntoFiles = (rawDiff) => {
+  if (!rawDiff) return [];
+  // Split by "diff --git" which denotes a new file in the diff
+  const parts = rawDiff.split(/(^|\n)diff --git /);
+  
+  const files = [];
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i].trim();
+    if (part && part !== 'diff --git') {
+      // Re-add the diff --git prefix for context to the AI
+      files.push(`diff --git ${part}`);
+    }
+  }
+  return files;
+};
+
+/**
  * Background worker to process code reviews
  */
 export const processReviewJob = async (jobData) => {
@@ -27,18 +46,53 @@ export const processReviewJob = async (jobData) => {
       throw new Error('The requested diff is empty or does not exist.');
     }
 
-    if (diff.length > 1000000) { // Gemini 1.5 Flash supports 1M+ tokens
+    if (diff.length > 1000000) { 
       throw new Error('The diff is too large for AI review. Please break it down.');
     }
 
-    // 2. Call the AI Service
-    socketService.emitToUser(userId, 'review:progress', { message: 'Analyzing code with AI...' });
-    const aiResult = await aiService.generateCodeReview(diff);
+    // 2. Parse diff and call AI Service concurrently for each file
+    socketService.emitToUser(userId, 'review:progress', { message: 'Analyzing code concurrently with AI...' });
+    
+    const fileDiffs = splitDiffIntoFiles(diff);
+    logger.info(`Split diff into ${fileDiffs.length} files for concurrent processing.`);
 
-    // 3. Save the results to the database atomically (Update existing pending review)
+    // Batch size of 10 to avoid Gemini rate limits
+    const batchSize = 10;
+    const aiResults = [];
+    
+    for (let i = 0; i < fileDiffs.length; i += batchSize) {
+      const batch = fileDiffs.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map(fileDiff => aiService.generateCodeReview(fileDiff))
+      );
+      aiResults.push(...batchResults);
+    }
+
+    // 3. Aggregate Results
+    const aggregatedResult = {
+      summary: aiResults.map((r, idx) => `File ${idx + 1}: ${r.summary}`).join('\n\n'),
+      overallScore: Math.round(aiResults.reduce((acc, r) => acc + r.overallScore, 0) / (aiResults.length || 1)),
+      grade: 'A', // Will calculate below
+      comments: aiResults.flatMap(r => r.comments),
+      usage: {
+        promptTokens: aiResults.reduce((acc, r) => acc + r.usage.promptTokens, 0),
+        completionTokens: aiResults.reduce((acc, r) => acc + r.usage.completionTokens, 0),
+        modelUsed: 'gemini-2.5-flash-parallel',
+        rawResponse: aiResults.map(r => r.usage.rawResponse)
+      }
+    };
+
+    // Calculate Grade based on aggregated score
+    if (aggregatedResult.overallScore >= 90) aggregatedResult.grade = 'A';
+    else if (aggregatedResult.overallScore >= 80) aggregatedResult.grade = 'B';
+    else if (aggregatedResult.overallScore >= 70) aggregatedResult.grade = 'C';
+    else if (aggregatedResult.overallScore >= 60) aggregatedResult.grade = 'D';
+    else aggregatedResult.grade = 'F';
+
+    // 4. Save the results to the database atomically (Update existing pending review)
     socketService.emitToUser(userId, 'review:progress', { message: 'Saving results to database...' });
     
-    await reviewRepository.updateReviewWithComments(reviewId, aiResult);
+    await reviewRepository.updateReviewWithComments(reviewId, aggregatedResult);
 
     // Fetch and return the fully populated review to emit to user
     const finalReview = await reviewRepository.getReviewById(reviewId);

@@ -92,11 +92,15 @@ class ReviewRepository {
   /**
    * Fetches all reviews for a given repository
    */
-  async getReviewsForRepository(repoId) {
+  async getReviewsForRepository(repoId, skip = 0, take = 20) {
     return prisma.review.findMany({
       where: { repoId },
+      skip,
+      take,
       include: {
-        comments: true,
+        comments: {
+          select: { id: true, category: true, title: true, severity: true, filePath: true, lineNumber: true } // Limit payload size
+        },
       },
       orderBy: {
         createdAt: 'desc',

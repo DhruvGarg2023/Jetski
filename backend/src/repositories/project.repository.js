@@ -9,9 +9,11 @@ export const createProject = async (userId, name) => {
   });
 };
 
-export const getProjectsByUser = async (userId) => {
+export const getProjectsByUser = async (userId, skip = 0, take = 50) => {
   return prisma.project.findMany({
     where: { userId },
+    skip,
+    take,
     include: {
       repositories: true,
     },

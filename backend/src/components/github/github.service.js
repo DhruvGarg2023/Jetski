@@ -2,6 +2,13 @@ import githubClient from '../../modules/github/github.client.js';
 import repositoryConnectionRepository from '../../repositories/repositoryConnection.repository.js';
 import AppError from '../../utils/appError.js';
 import prisma from '../../config/prisma.js';
+import { LRUCache } from 'lru-cache';
+
+// Initialize cache: max 100 items, TTL 60 seconds
+const cache = new LRUCache({
+  max: 100,
+  ttl: 1000 * 60,
+});
 
 class GitHubService {
   /**
@@ -54,36 +61,53 @@ class GitHubService {
    * Fetch commits for a specific connected repository
    */
   async getRepositoryCommits(connectionId, token, userId) {
+    const cacheKey = `commits_${connectionId}`;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
+
     const connection = await this._getValidatedConnection(connectionId, userId);
     const [owner, repoName] = connection.fullName.split('/');
     
-    return await githubClient.getCommits(token, owner, repoName, connection.defaultBranch);
+    const commits = await githubClient.getCommits(token, owner, repoName, connection.defaultBranch);
+    cache.set(cacheKey, commits);
+    return commits;
   }
 
   /**
    * Fetch branches for a specific connected repository
    */
   async getRepositoryBranches(connectionId, token, userId) {
+    const cacheKey = `branches_${connectionId}`;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
+
     const connection = await this._getValidatedConnection(connectionId, userId);
     const [owner, repoName] = connection.fullName.split('/');
     
-    return await githubClient.getBranches(token, owner, repoName);
+    const branches = await githubClient.getBranches(token, owner, repoName);
+    cache.set(cacheKey, branches);
+    return branches;
   }
 
   /**
    * Fetch PRs for a specific connected repository
    */
   async getRepositoryPullRequests(connectionId, token, userId) {
+    const cacheKey = `prs_${connectionId}`;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
+
     const connection = await this._getValidatedConnection(connectionId, userId);
     const [owner, repoName] = connection.fullName.split('/');
     
-    return await githubClient.getPullRequests(token, owner, repoName);
+    const prs = await githubClient.getPullRequests(token, owner, repoName);
+    cache.set(cacheKey, prs);
+    return prs;
   }
 
   /**
    * Get raw diff of a specific commit
    */
   async getCommitDiff(connectionId, sha, token, userId) {
+    // Diffs can be huge, we might not want to cache them in memory, or if we do, use a separate cache
+    // For now, we fetch it fresh (diffs are usually only fetched once during review orchestration)
     const connection = await this._getValidatedConnection(connectionId, userId);
     const [owner, repoName] = connection.fullName.split('/');
     
