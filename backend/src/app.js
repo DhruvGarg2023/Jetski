@@ -72,7 +72,7 @@ app.use('/api/queues', queueRoutes);
 app.use('/api-docs', docsRoutes);
 
 // ─── Error Handler ───────────────────────────────────────────────────────────
-// Must be the last middleware — catches all unhandled errors.
+// Catch-all custom error handler
 app.use(errorHandler);
 
 export default app;

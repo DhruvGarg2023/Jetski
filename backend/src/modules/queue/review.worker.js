@@ -27,10 +27,11 @@ const splitDiffIntoFiles = (rawDiff) => {
  * Background worker to process code reviews
  */
 export const processReviewJob = async (jobData) => {
-  const { reviewId, repoId, targetType, targetId, githubToken, userId } = jobData;
+  const { reviewId, repoId, targetType, targetId, githubToken, userId, correlationId } = jobData;
+  const childLogger = logger.child({ correlationId, reviewId });
 
   try {
-    logger.info(`Starting background review process for Review ID: ${reviewId}`);
+    childLogger.info(`Starting background review process`);
     
     // 1. Fetch the raw diff from GitHub
     socketService.emitToUser(userId, 'review:progress', { message: 'Fetching diff from GitHub...' });
@@ -54,7 +55,7 @@ export const processReviewJob = async (jobData) => {
     socketService.emitToUser(userId, 'review:progress', { message: 'Analyzing code concurrently with AI...' });
     
     const fileDiffs = splitDiffIntoFiles(diff);
-    logger.info(`Split diff into ${fileDiffs.length} files for concurrent processing.`);
+    childLogger.info(`Split diff into ${fileDiffs.length} files for concurrent processing.`);
 
     // Batch size of 10 to avoid Gemini rate limits
     const batchSize = 10;
@@ -97,12 +98,12 @@ export const processReviewJob = async (jobData) => {
     // Fetch and return the fully populated review to emit to user
     const finalReview = await reviewRepository.getReviewById(reviewId);
     
-    logger.info(`Successfully processed review ${reviewId}`);
+    childLogger.info(`Successfully processed review`);
     socketService.emitToUser(userId, 'review:complete', finalReview);
     
     return { success: true, reviewId };
   } catch (error) {
-    logger.error(error, `Failed to process review job ${reviewId}`);
+    childLogger.error(error, `Failed to process review job`);
     
     // Mark the review as FAILED in the DB
     await reviewRepository.updateReviewStatus(reviewId, 'FAILED');

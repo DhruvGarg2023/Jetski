@@ -6,7 +6,7 @@ import catchAsync from '../../utils/catchAsync.js';
  */
 export const initiateReview = catchAsync(async (req, res) => {
   const userId = req.user.id;
-  const payload = req.body;
+  const payload = { ...req.body, correlationId: req.headers['x-request-id'] };
 
   const review = await reviewsService.initiateReview(userId, payload);
 

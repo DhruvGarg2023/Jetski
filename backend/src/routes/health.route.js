@@ -60,6 +60,38 @@ router.get('/github', async (req, res) => {
   }
 });
 
+// 5. Deep Health Metrics (For Datadog / Prometheus / Cron monitors)
+router.get('/metrics', async (req, res) => {
+  try {
+    const memory = process.memoryUsage();
+    
+    // Estimate queue backlog
+    let pendingJobs = 0;
+    if (queueService.boss && queueService.boss.isStarted) {
+      // PgBoss doesn't have a simple getCount(), but we can do a quick check via state
+      const queueDetails = await queueService.boss.getQueue('code-review');
+      pendingJobs = queueDetails ? queueDetails.length : 0; // fallback if unsupported
+    }
+    
+    return res.status(200).json({
+      uptime: process.uptime(),
+      memory: {
+        rss_MB: Math.round(memory.rss / 1024 / 1024),
+        heapTotal_MB: Math.round(memory.heapTotal / 1024 / 1024),
+        heapUsed_MB: Math.round(memory.heapUsed / 1024 / 1024),
+      },
+      queue: {
+        status: queueService.boss && queueService.boss.isStarted ? 'connected' : 'disconnected',
+        activeWorkers: 5 // Static for now, as configured in worker
+      },
+      pid: process.pid
+    });
+  } catch (error) {
+    logger.error('Failed to collect metrics', error);
+    return res.status(500).json({ status: 'error', error: error.message });
+  }
+});
+
 // 5. Comprehensive Health (All Systems)
 router.get('/', async (req, res) => {
   try {

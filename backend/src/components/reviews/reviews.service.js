@@ -10,7 +10,7 @@ class ReviewsService {
    * Orchestrates the review process: Creates pending DB entry -> Enqueues Job
    */
   async initiateReview(userId, payload) {
-    const { repoId, targetType, targetId, githubToken } = payload;
+    const { repoId, targetType, targetId, githubToken, correlationId } = payload;
 
     logger.info(`Initiating background review for ${targetType} ${targetId} on repo ${repoId}`);
     
@@ -29,7 +29,8 @@ class ReviewsService {
       targetType,
       targetId,
       githubToken,
-      userId
+      userId,
+      correlationId
     };
 
     await queueService.addReviewJob(jobPayload);
