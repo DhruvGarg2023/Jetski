@@ -3,14 +3,6 @@ import { env } from '../config/env.js';
 import fs from 'fs';
 import path from 'path';
 
-// Ensure logs directory exists in production
-if (env.NODE_ENV === 'production') {
-  const logDir = path.join(process.cwd(), 'logs');
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
-}
-
 // Development configuration uses pino-pretty for stdout
 const devTransport = {
   target: 'pino-pretty',
@@ -21,24 +13,10 @@ const devTransport = {
   },
 };
 
-// Production configuration logs to stdout AND rotates files daily (up to 5MB, keep last 7 days)
+// Production configuration logs to stdout ONLY (cloud platforms handle log aggregation natively)
 const prodTransport = {
-  targets: [
-    { target: 'pino/file', options: { destination: 1 } }, // Log to stdout
-    {
-      target: 'pino-roll',
-      options: {
-        file: path.join(process.cwd(), 'logs', 'app'),
-        frequency: 'daily',
-        size: '5m',
-        mkdir: true,
-        extension: '.log',
-        limit: {
-          count: 7, // Keep 7 files
-        },
-      },
-    },
-  ],
+  target: 'pino/file',
+  options: { destination: 1 } // 1 = stdout
 };
 
 const logger = pino({
