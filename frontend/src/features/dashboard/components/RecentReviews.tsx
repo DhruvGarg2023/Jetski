@@ -6,12 +6,14 @@ import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Review } from "@/features/projects/types";
+import { useRouter } from "next/navigation";
 
 interface RecentReviewsProps {
   reviews: Review[];
 }
 
 export function RecentReviews({ reviews }: RecentReviewsProps) {
+  const router = useRouter();
   
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -59,7 +61,11 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
                 </TableHeader>
                 <TableBody>
                   {reviews.map((review) => (
-                    <TableRow key={review.id}>
+                    <TableRow 
+                      key={review.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => router.push(`/reviews/${review.id}`)}
+                    >
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {getStatusIcon(review.status)}

@@ -8,19 +8,7 @@ export interface InitiateReviewPayload {
   correlationId?: string;
 }
 
-export interface ReviewResponse {
-  id: string;
-  repoId: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
-  targetType: 'COMMIT' | 'PR';
-  targetId: string;
-  summary?: string;
-  overallScore?: number;
-  grade?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
+import { ReviewResponse } from './types';
 export const reviewsService = {
   initiateReview: async (payload: InitiateReviewPayload): Promise<ReviewResponse> => {
     const { data } = await api.post('/reviews', payload);
