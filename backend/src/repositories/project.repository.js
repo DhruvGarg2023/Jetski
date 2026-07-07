@@ -15,7 +15,13 @@ export const getProjectsByUser = async (userId, skip = 0, take = 50) => {
     skip,
     take,
     include: {
-      repositories: true,
+      repositories: {
+        include: {
+          reviews: {
+            orderBy: { createdAt: 'desc' },
+          }
+        }
+      },
     },
   });
 };
