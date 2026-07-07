@@ -14,20 +14,20 @@ export const connectRepository = async (userId, repoOwner, repoName, customProje
 
   // 1. Verify the repo exists on GitHub
   const repoData = await githubClient.getRepository(token, repoOwner, repoName);
-  
+
   if (!repoData) {
     throw new AppError('Repository not found or inaccessible.', 404);
   }
 
   const projectName = customProjectName || repoData.name;
-  
+
   // 2. Create the project and repo connection in our database
   // Note: we use repoData.id.toString() because github IDs are integers but we store as string
   const project = await projectRepository.createProjectWithConnection(
-    userId, 
-    projectName, 
-    repoData.id.toString(), 
-    repoData.full_name, 
+    userId,
+    projectName,
+    repoData.id.toString(),
+    repoData.full_name,
     repoData.default_branch
   );
 
@@ -36,10 +36,10 @@ export const connectRepository = async (userId, repoOwner, repoName, customProje
 
 export const getProjectDetails = async (userId, projectId) => {
   const project = await projectRepository.getProjectById(userId, projectId);
-  
+
   if (!project) {
     throw new AppError('Project not found or you do not have permission', 404);
   }
-  
+
   return project;
 };

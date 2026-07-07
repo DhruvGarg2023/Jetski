@@ -11,4 +11,9 @@ export const projectsService = {
     const { data } = await api.get(`/projects/${id}`);
     return data.data.project;
   },
+
+  createProject: async (payload: { projectName?: string, repoOwner: string, repoName: string }): Promise<Project> => {
+    const { data } = await api.post('/projects', payload);
+    return data.data.project;
+  },
 };
