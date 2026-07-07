@@ -4,7 +4,9 @@ import * as React from "react";
 import { ThemeProvider } from "./theme-provider";
 import { QueryProvider } from "./query-provider";
 import { AuthProvider } from "./auth-provider";
+import { SocketProvider } from "./socket-provider";
 import { Toaster } from "sonner";
+import { ReviewProgressToast } from "@/features/reviews/components/ReviewProgressToast";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -16,8 +18,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <QueryProvider>
         <AuthProvider>
-          {children}
-          <Toaster richColors position="top-right" />
+          <SocketProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+            <ReviewProgressToast />
+          </SocketProvider>
         </AuthProvider>
       </QueryProvider>
     </ThemeProvider>

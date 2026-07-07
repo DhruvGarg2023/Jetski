@@ -1,11 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { githubService } from "../github.service";
 import { GithubPullRequest } from "../types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { GitPullRequest, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { reviewsService } from "@/features/reviews/reviews.service";
+import { toast } from "sonner";
 
 export function PullRequestsList({ connectionId }: { connectionId: string }) {
   const token = typeof window !== "undefined" ? localStorage.getItem("github_pat") : null;
@@ -14,6 +17,21 @@ export function PullRequestsList({ connectionId }: { connectionId: string }) {
     queryKey: ["pullRequests", connectionId, token],
     queryFn: () => githubService.getPullRequests(connectionId, token!),
     enabled: !!token && !!connectionId,
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: (targetId: string) => reviewsService.initiateReview({
+      repoId: connectionId,
+      targetType: 'PR',
+      targetId,
+      githubToken: token!
+    }),
+    onSuccess: () => {
+      toast.success("Review initiated successfully");
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || "Failed to initiate review");
+    }
   });
 
   if (!token) {
@@ -59,7 +77,7 @@ export function PullRequestsList({ connectionId }: { connectionId: string }) {
               </div>
             </div>
           </div>
-          <div className="mt-4 sm:mt-0 flex items-center">
+          <div className="mt-4 sm:mt-0 flex items-center gap-4">
             <a 
               href={pr.htmlUrl} 
               target="_blank" 
@@ -69,6 +87,14 @@ export function PullRequestsList({ connectionId }: { connectionId: string }) {
               View on GitHub
               <ExternalLink className="h-3 w-3" />
             </a>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={reviewMutation.isPending && reviewMutation.variables === pr.number.toString()}
+              onClick={() => reviewMutation.mutate(pr.number.toString())}
+            >
+              Review
+            </Button>
           </div>
         </div>
       ))}

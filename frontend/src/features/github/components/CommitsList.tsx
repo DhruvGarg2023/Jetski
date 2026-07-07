@@ -1,11 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { githubService } from "../github.service";
 import { GithubCommit } from "../types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { GitCommit, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { reviewsService } from "@/features/reviews/reviews.service";
+import { toast } from "sonner";
 
 export function CommitsList({ connectionId }: { connectionId: string }) {
   const token = typeof window !== "undefined" ? localStorage.getItem("github_pat") : null;
@@ -14,6 +17,21 @@ export function CommitsList({ connectionId }: { connectionId: string }) {
     queryKey: ["commits", connectionId, token],
     queryFn: () => githubService.getCommits(connectionId, token!),
     enabled: !!token && !!connectionId,
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: (targetId: string) => reviewsService.initiateReview({
+      repoId: connectionId,
+      targetType: 'COMMIT',
+      targetId,
+      githubToken: token!
+    }),
+    onSuccess: () => {
+      toast.success("Review initiated successfully");
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || "Failed to initiate review");
+    }
   });
 
   if (!token) {
@@ -71,6 +89,14 @@ export function CommitsList({ connectionId }: { connectionId: string }) {
             >
               <ExternalLink className="h-4 w-4" />
             </a>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={reviewMutation.isPending && reviewMutation.variables === commit.sha}
+              onClick={() => reviewMutation.mutate(commit.sha)}
+            >
+              Review
+            </Button>
           </div>
         </div>
       ))}
