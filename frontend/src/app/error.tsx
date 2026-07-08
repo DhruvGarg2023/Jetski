@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { AlertOctagon } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
-export default function ErrorBoundary({
+import { AuroraBackground } from "@/components/aceternity/aurora-background";
+
+export default function GlobalError({
   error,
   reset,
 }: {
@@ -11,20 +16,49 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Application error:", error);
+    console.error(error);
   }, [error]);
 
   return (
-    <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
-      <div className="space-y-2 text-center">
-        <h2 className="text-2xl font-bold tracking-tight">Something went wrong!</h2>
-        <p className="text-muted-foreground">
-          An unexpected error occurred. Our team has been notified.
-        </p>
-      </div>
-      <Button onClick={() => reset()} variant="default">
-        Try again
-      </Button>
-    </div>
+    <AuroraBackground>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-center space-y-8 max-w-md w-full relative z-10 p-8 rounded-3xl bg-background/50 backdrop-blur-xl border border-destructive/20 shadow-2xl"
+      >
+        <motion.div 
+          animate={{ scale: [1, 1.05, 1], rotate: [0, -5, 5, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          className="flex justify-center"
+        >
+          <div className="rounded-full bg-destructive/20 p-8 shadow-[0_0_50px_rgba(239,68,68,0.3)]">
+            <AlertOctagon className="h-24 w-24 text-destructive" />
+          </div>
+        </motion.div>
+        
+        <div className="space-y-3">
+          <h1 className="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-destructive to-orange-500">System Error</h1>
+          <p className="text-muted-foreground text-lg">
+            An unexpected glitch occurred in the matrix. Our team has been notified.
+          </p>
+        </div>
+
+        <div className="p-4 bg-black/5 dark:bg-black/40 rounded-xl text-left overflow-auto max-h-32 border border-black/5 dark:border-white/5 backdrop-blur-md">
+          <p className="text-xs text-muted-foreground font-mono break-words">
+            {error.message || "Unknown Application Error"}
+          </p>
+        </div>
+
+        <div className="pt-4 flex flex-col sm:flex-row justify-center gap-4">
+          <Button variant="outline" onClick={() => reset()} className="w-full sm:w-auto h-12 px-8">
+            Try again
+          </Button>
+          <Link href="/dashboard" className={buttonVariants({ className: "w-full sm:w-auto h-12 px-8 shadow-lg shadow-primary/25" })}>
+            Back to Dashboard
+          </Link>
+        </div>
+      </motion.div>
+    </AuroraBackground>
   );
 }

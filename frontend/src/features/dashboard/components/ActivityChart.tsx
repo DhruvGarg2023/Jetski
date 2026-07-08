@@ -5,6 +5,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { format, subDays } from "date-fns";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 interface ActivityChartProps {
   data: { date: string; count: number }[];
@@ -26,7 +27,10 @@ export function ActivityChart({ data }: ActivityChartProps) {
       transition={{ duration: 0.4, delay: 0.2 }}
       className="col-span-1 lg:col-span-4"
     >
-      <Card className="h-full">
+      <Card className="h-full relative overflow-hidden group bg-background/50 backdrop-blur-sm border-white/10 transition-colors hover:bg-muted/50">
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+          <BorderBeam size={400} duration={15} delay={1} />
+        </div>
         <CardHeader>
           <CardTitle>Review Activity</CardTitle>
           <CardDescription>
@@ -39,8 +43,8 @@ export function ActivityChart({ data }: ActivityChartProps) {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={theme === 'dark' ? '#3b82f6' : '#2563eb'} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={theme === 'dark' ? '#3b82f6' : '#2563eb'} stopOpacity={0} />
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis 
@@ -60,20 +64,22 @@ export function ActivityChart({ data }: ActivityChartProps) {
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
-                    borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
-                    borderRadius: '8px',
-                    color: theme === 'dark' ? '#f9fafb' : '#111827'
+                    backgroundColor: 'hsl(var(--background))',
+                    borderColor: 'hsl(var(--border))',
+                    borderRadius: '12px',
+                    color: 'hsl(var(--foreground))',
+                    boxShadow: '0 10px 40px -10px rgba(139,92,246,0.3)'
                   }}
-                  itemStyle={{ color: theme === 'dark' ? '#60a5fa' : '#2563eb' }}
+                  itemStyle={{ color: '#8b5cf6', fontWeight: 600 }}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="count" 
-                  stroke={theme === 'dark' ? '#3b82f6' : '#2563eb'} 
-                  strokeWidth={2}
+                  stroke="#8b5cf6" 
+                  strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#colorCount)" 
+                  animationDuration={1500}
                 />
               </AreaChart>
             </ResponsiveContainer>

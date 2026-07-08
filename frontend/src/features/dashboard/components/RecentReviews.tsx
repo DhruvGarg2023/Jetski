@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Review } from "@/features/projects/types";
 import { useRouter } from "next/navigation";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 interface RecentReviewsProps {
   reviews: Review[];
@@ -35,7 +36,10 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
       transition={{ duration: 0.4, delay: 0.3 }}
       className="col-span-1 lg:col-span-3"
     >
-      <Card className="h-full">
+      <Card className="h-full relative overflow-hidden group bg-background/50 backdrop-blur-sm border-white/10 transition-colors hover:bg-muted/50">
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+          <BorderBeam size={400} duration={15} delay={2} />
+        </div>
         <CardHeader>
           <CardTitle>Recent Reviews</CardTitle>
           <CardDescription>
@@ -51,7 +55,7 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
             <div className="overflow-auto max-h-[350px]">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="hover:bg-transparent border-b-white/5">
                     <TableHead>Status</TableHead>
                     <TableHead>Repository</TableHead>
                     <TableHead>Target</TableHead>
@@ -62,7 +66,7 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
                   {reviews.map((review) => (
                     <TableRow 
                       key={review.id} 
-                      className="cursor-pointer hover:bg-muted/50"
+                      className="cursor-pointer transition-colors hover:bg-white/5 border-b-white/5"
                       onClick={() => router.push(`/reviews/${review.id}`)}
                     >
                       <TableCell>
@@ -72,16 +76,15 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">
-                        {/* We will map repo name separately if possible, else placeholder */}
                         {(review as any).repoName || "Unknown Repo"}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">{review.targetType}</span>
-                          <span className="text-xs text-muted-foreground font-mono">{review.targetId.substring(0, 7)}</span>
+                          <span className="text-xs text-muted-foreground font-mono">{review.targetId?.substring(0, 7) || "N/A"}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right text-sm text-muted-foreground">
+                      <TableCell className="text-right text-sm text-muted-foreground whitespace-nowrap">
                         {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
                       </TableCell>
                     </TableRow>

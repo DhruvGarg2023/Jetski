@@ -12,6 +12,9 @@ import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "next-themes";
 import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/features/projects/projects.service";
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -81,7 +84,12 @@ export default function SettingsPage() {
   }, [projects]);
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full pb-10">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col gap-6 max-w-4xl mx-auto w-full pb-10"
+    >
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
       </div>
@@ -194,8 +202,9 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               {isProjectsLoading ? (
-                <div className="h-32 flex items-center justify-center text-muted-foreground">
-                  Loading statistics...
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Skeleton className="h-24 rounded-lg" />
+                  <Skeleton className="h-24 rounded-lg" />
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-3">
@@ -240,46 +249,52 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="github" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                GitHub Personal Access Token
-              </CardTitle>
-              <CardDescription>
-                Enter your GitHub Personal Access Token (PAT) to allow Jetski to connect to your repositories and perform code reviews. 
-                This token is stored locally in your browser.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2">
-                <Label htmlFor="pat">Personal Access Token</Label>
-                <Input
-                  id="pat"
-                  type="password"
-                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                  value={pat}
-                  onChange={(e) => {
-                    setPat(e.target.value);
-                    if (isSaved) setIsSaved(false);
-                  }}
-                />
-                <p className="text-xs text-muted-foreground mt-2">
-                  Your token needs the <strong>repo</strong> scope to read repositories and commits.
-                </p>
+          <motion.div whileHover={{ y: -5 }} className="group relative">
+            <Card className="bg-background/50 backdrop-blur-md border-white/10 overflow-hidden shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
+                <BorderBeam size={300} duration={10} delay={0} />
               </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={handleClearPat} disabled={!isSaved && pat.length === 0}>
-                Clear
-              </Button>
-              <Button onClick={handleSavePat} disabled={isSaved && pat.length > 0}>
-                {isSaved ? "Saved" : "Save Token"}
-              </Button>
-            </CardFooter>
-          </Card>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5 text-primary" />
+                  GitHub Personal Access Token
+                </CardTitle>
+                <CardDescription>
+                  Enter your GitHub Personal Access Token (PAT) to allow Jetski to connect to your repositories and perform code reviews. 
+                  This token is stored locally in your browser.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <div className="grid gap-2">
+                  <Label htmlFor="pat">Personal Access Token</Label>
+                  <Input
+                    id="pat"
+                    type="password"
+                    placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                    value={pat}
+                    onChange={(e) => {
+                      setPat(e.target.value);
+                      if (isSaved) setIsSaved(false);
+                    }}
+                    className="bg-black/20 border-white/10"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Your token needs the <strong>repo</strong> scope to read repositories and commits.
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between relative z-10 border-t border-white/5 pt-4">
+                <Button variant="outline" onClick={handleClearPat} disabled={!isSaved && pat.length === 0} className="hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30">
+                  Clear
+                </Button>
+                <Button onClick={handleSavePat} disabled={isSaved && pat.length > 0} className={isSaved ? "bg-green-600/20 text-green-500 hover:bg-green-600/30" : ""}>
+                  {isSaved ? "Saved" : "Save Token"}
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }

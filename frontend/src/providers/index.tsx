@@ -20,7 +20,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <SocketProvider>
             {children}
-            <Toaster richColors position="top-right" />
+            <Toaster 
+              richColors 
+              position="top-right"
+              toastOptions={{
+                classNames: {
+                  toast: "bg-background border-border border shadow-2xl rounded-xl font-sans",
+                  description: "text-muted-foreground",
+                  actionButton: "bg-primary text-primary-foreground font-medium",
+                  cancelButton: "bg-muted text-muted-foreground",
+                },
+              }}
+            />
             <ReviewProgressToast />
           </SocketProvider>
         </AuthProvider>

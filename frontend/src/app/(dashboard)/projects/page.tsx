@@ -5,13 +5,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectsService } from "@/features/projects/projects.service";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Folder, Loader2, Plus } from "lucide-react";
+import { Folder, Loader2, Plus, GitBranch } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 export default function ProjectsPage() {
   const [open, setOpen] = useState(false);
@@ -54,14 +56,26 @@ export default function ProjectsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-10 w-48" />
+      <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <Skeleton className="h-10 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
           <Skeleton className="h-10 w-32" />
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="flex flex-col opacity-50">
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-1/3" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -77,7 +91,12 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col gap-6 w-full pb-10"
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
@@ -142,35 +161,79 @@ export default function ProjectsPage() {
       </div>
 
       {projects?.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-[40vh] border-2 border-dashed rounded-xl gap-4">
-          <Folder className="h-12 w-12 text-muted-foreground opacity-50" />
-          <h3 className="text-lg font-medium">No projects found</h3>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative flex flex-col items-center justify-center h-[50vh] border-2 border-dashed rounded-3xl gap-4 bg-muted/10 overflow-hidden"
+        >
+          {/* Subtle background glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <motion.div 
+            animate={{ y: [0, -8, 0] }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 p-5 border border-primary/10 shadow-lg shadow-primary/5"
+          >
+            <Folder className="h-10 w-10 text-primary" />
+          </motion.div>
+          
+          <h3 className="text-xl font-semibold tracking-tight mt-2">No projects found</h3>
           <p className="text-sm text-muted-foreground text-center max-w-sm">
-            Get started by creating a new project.
+            Get started by creating a new project and connecting a GitHub repository to begin AI code reviews.
           </p>
-        </div>
+          <Button onClick={() => setOpen(true)} className="mt-4 shadow-lg shadow-primary/20">
+            <Plus className="mr-2 h-4 w-4" /> Create First Project
+          </Button>
+        </motion.div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {projects?.map((project) => (
-            <Card key={project.id} className="flex flex-col hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Folder className="h-5 w-5 text-muted-foreground" />
-                  {project.name}
-                </CardTitle>
-                <CardDescription>
-                  Created {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <div className="text-sm text-muted-foreground">
-                  {project.repositories?.length || 0} Connected {project.repositories?.length === 1 ? 'Repository' : 'Repositories'}
+          {projects?.map((project, index) => (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              whileHover={{ y: -5 }}
+              className="group relative"
+            >
+              <Card className="flex flex-col h-full bg-background/50 backdrop-blur-sm border-white/10 overflow-hidden shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
+                  <BorderBeam size={300} duration={10} delay={index} />
                 </div>
-              </CardContent>
-            </Card>
+                <CardHeader className="relative z-10">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <div className="rounded-full bg-primary/10 p-2 text-primary">
+                      <Folder className="h-4 w-4" />
+                    </div>
+                    {project.name}
+                  </CardTitle>
+                  <CardDescription>
+                    Created {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 relative z-10">
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {/* Decorative dots to represent repos */}
+                      {[...Array(Math.min(project.repositories?.length || 0, 3))].map((_, i) => (
+                        <div key={i} className="h-6 w-6 rounded-full border-2 border-background bg-secondary flex items-center justify-center">
+                          <GitBranch className="h-3 w-3 text-secondary-foreground" />
+                        </div>
+                      ))}
+                      {(project.repositories?.length || 0) > 3 && (
+                        <div className="h-6 w-6 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-medium">
+                          +{(project.repositories?.length || 0) - 3}
+                        </div>
+                      )}
+                    </div>
+                    <span className="ml-2">{project.repositories?.length || 0} Connected {project.repositories?.length === 1 ? 'Repository' : 'Repositories'}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

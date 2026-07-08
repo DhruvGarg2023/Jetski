@@ -8,6 +8,7 @@ import { RecentReviews } from "@/features/dashboard/components/RecentReviews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Project, Review } from "@/features/projects/types";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const { data: projects, isLoading, error } = useQuery({
@@ -68,14 +69,14 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 w-full pb-10">
         <div className="flex items-center justify-between space-y-2">
           <Skeleton className="h-10 w-48" />
         </div>
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
-          <Skeleton className="h-[120px] rounded-xl" />
-          <Skeleton className="h-[120px] rounded-xl" />
-          <Skeleton className="h-[120px] rounded-xl" />
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[120px] rounded-xl" />
+          ))}
         </div>
         <div className="grid gap-4 md:gap-8 lg:grid-cols-7">
           <Skeleton className="h-[400px] col-span-4 rounded-xl" />
@@ -95,7 +96,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="flex flex-col gap-6 w-full pb-10"
+    >
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>
@@ -110,6 +116,6 @@ export default function DashboardPage() {
         <ActivityChart data={chartData} />
         <RecentReviews reviews={topRecentReviews} />
       </div>
-    </div>
+    </motion.div>
   );
 }

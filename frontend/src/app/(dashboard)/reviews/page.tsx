@@ -6,7 +6,9 @@ import { projectsService } from '@/features/projects/projects.service';
 import { ReviewHistoryCard } from '@/features/reviews/components/ReviewHistoryCard';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, SlidersHorizontal } from 'lucide-react';
+import { Loader2, Search, SlidersHorizontal, FileText } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
 export default function ReviewHistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,9 +64,17 @@ export default function ReviewHistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-muted-foreground">Loading history...</span>
+      <div className="space-y-6 max-w-5xl mx-auto w-full pb-10">
+        <div>
+          <Skeleton className="h-10 w-48 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <Skeleton className="h-16 w-full" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -79,7 +89,12 @@ export default function ReviewHistoryPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto w-full pb-10">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6 max-w-5xl mx-auto w-full pb-10"
+    >
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Review History</h1>
         <p className="text-muted-foreground mt-2">
@@ -131,11 +146,17 @@ export default function ReviewHistoryPage() {
       </div>
 
       {filteredReviews.length === 0 ? (
-        <div className="text-center p-12 border rounded-xl bg-card shadow-sm flex flex-col items-center justify-center">
-          <SlidersHorizontal className="h-10 w-10 text-muted-foreground/50 mb-4" />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center p-12 border-2 border-dashed rounded-xl bg-muted/20 flex flex-col items-center justify-center"
+        >
+          <div className="rounded-full bg-primary/10 p-4 mb-4">
+            <FileText className="h-8 w-8 text-primary" />
+          </div>
           <h3 className="text-lg font-medium">No reviews found</h3>
-          <p className="text-muted-foreground mt-1">Try adjusting your filters or search query.</p>
-        </div>
+          <p className="text-muted-foreground mt-1 max-w-sm">Try adjusting your filters, searching for a different term, or initiate a new code review.</p>
+        </motion.div>
       ) : (
         <div className="space-y-4">
           {filteredReviews.map(review => (
@@ -143,6 +164,6 @@ export default function ReviewHistoryPage() {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

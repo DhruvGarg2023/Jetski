@@ -8,6 +8,10 @@ import { Loader2, TrendingUp, CheckCircle, XCircle, Code2 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useTheme } from 'next-themes';
 import { format, subDays } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
+import { BorderBeam } from '@/components/magicui/border-beam';
+import { NumberTicker } from '@/components/magicui/number-ticker';
 
 export default function ReportsPage() {
   const { theme } = useTheme();
@@ -82,9 +86,20 @@ export default function ReportsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-muted-foreground">Generating reports...</span>
+      <div className="space-y-6 max-w-6xl mx-auto w-full pb-10">
+        <div>
+          <Skeleton className="h-10 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Skeleton className="col-span-1 lg:col-span-4 h-96 rounded-xl" />
+          <Skeleton className="col-span-1 lg:col-span-3 h-96 rounded-xl" />
+        </div>
       </div>
     );
   }
@@ -101,7 +116,12 @@ export default function ReportsPage() {
   const COLORS = ['#22c55e', '#ef4444', '#3b82f6'];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto w-full pb-10">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6 max-w-6xl mx-auto w-full pb-10"
+    >
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Analytics & Reports</h1>
         <p className="text-muted-foreground mt-2">
@@ -109,45 +129,67 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
-            <Code2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalReviews}</div>
-            <p className="text-xs text-muted-foreground">Across all connected repositories</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Review Score</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.averageScore}/100</div>
-            <p className="text-xs text-muted-foreground">Higher is better</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed vs Failed</CardTitle>
-            {stats.statusData.find(s => s.name === 'Failed') ? (
-              <XCircle className="h-4 w-4 text-red-500" />
-            ) : (
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            )}
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.statusData.find(s => s.name === 'Completed')?.value || 0} / {stats.totalReviews}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div whileHover={{ y: -5 }} className="group relative h-full">
+          <Card className="h-full bg-background/50 backdrop-blur-md border-white/10 overflow-hidden relative shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+              <BorderBeam size={200} duration={8} delay={0} />
             </div>
-            <p className="text-xs text-muted-foreground">Successfully processed by AI</p>
-          </CardContent>
-        </Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
+              <Code2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="text-3xl font-bold font-mono">
+                <NumberTicker value={stats.totalReviews} />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Across all connected repositories</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div whileHover={{ y: -5 }} className="group relative h-full">
+          <Card className="h-full bg-background/50 backdrop-blur-md border-white/10 overflow-hidden relative shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+              <BorderBeam size={200} duration={8} delay={1} />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium">Average Review Score</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="text-3xl font-bold font-mono flex items-baseline">
+                <NumberTicker value={stats.averageScore} />
+                <span className="text-lg text-muted-foreground ml-1">/100</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Higher is better</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -5 }} className="group relative h-full">
+          <Card className="h-full bg-background/50 backdrop-blur-md border-white/10 overflow-hidden relative shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+              <BorderBeam size={200} duration={8} delay={2} />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+              <CardTitle className="text-sm font-medium">Completed Reviews</CardTitle>
+              {stats.statusData.find(s => s.name === 'Failed') ? (
+                <XCircle className="h-4 w-4 text-red-500" />
+              ) : (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              )}
+            </CardHeader>
+            <CardContent className="relative z-10">
+              <div className="text-3xl font-bold font-mono">
+                <NumberTicker value={stats.statusData.find(s => s.name === 'Completed')?.value || 0} />
+                <span className="text-lg text-muted-foreground mx-1">/</span>
+                <span className="text-xl text-muted-foreground">{stats.totalReviews}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Successfully processed by AI</p>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -244,6 +286,6 @@ export default function ReportsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }
