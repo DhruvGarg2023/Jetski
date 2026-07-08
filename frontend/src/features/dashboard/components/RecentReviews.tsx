@@ -21,8 +21,7 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case "FAILED":
         return <XCircle className="h-4 w-4 text-red-500" />;
-      case "PENDING":
-      case "PROCESSING":
+      case "IN_PROGRESS":
         return <Clock className="h-4 w-4 text-blue-500 animate-pulse" />;
       default:
         return null;
@@ -55,7 +54,7 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
                   <TableRow>
                     <TableHead>Status</TableHead>
                     <TableHead>Repository</TableHead>
-                    <TableHead>Branch / Commit</TableHead>
+                    <TableHead>Target</TableHead>
                     <TableHead className="text-right">Time</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -78,8 +77,8 @@ export function RecentReviews({ reviews }: RecentReviewsProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium">{review.branchName}</span>
-                          <span className="text-xs text-muted-foreground font-mono">{review.commitHash.substring(0, 7)}</span>
+                          <span className="text-sm font-medium">{review.targetType}</span>
+                          <span className="text-xs text-muted-foreground font-mono">{review.targetId.substring(0, 7)}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-right text-sm text-muted-foreground">

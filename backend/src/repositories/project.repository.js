@@ -19,6 +19,7 @@ export const getProjectsByUser = async (userId, skip = 0, take = 50) => {
         include: {
           reviews: {
             orderBy: { createdAt: 'desc' },
+            include: { aiHistory: true }
           }
         }
       },

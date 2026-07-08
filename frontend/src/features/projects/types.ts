@@ -21,10 +21,17 @@ export interface Repository {
 export interface Review {
   id: string;
   repositoryId: string;
-  commitHash: string;
-  branchName: string;
-  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
-  report?: any; // To be refined later
+  targetId: string;
+  targetType: "COMMIT" | "PR";
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+  overallScore?: number;
+  grade?: string;
+  summary?: string;
+  aiHistory?: {
+    promptTokens: number;
+    completionTokens: number;
+    modelUsed: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
