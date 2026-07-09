@@ -34,6 +34,6 @@ describe('ReviewSummaryCard', () => {
     expect(screen.getByText('The code is generally good, but there are some critical security flaws.')).toBeInTheDocument()
     
     // Check if score grade is rendered
-    expect(screen.getByText('B')).toBeInTheDocument()
+    expect(screen.getByText('[B]')).toBeInTheDocument()
   })
 })

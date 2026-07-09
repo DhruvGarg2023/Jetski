@@ -87,11 +87,13 @@ process.once('SIGUSR2', () => gracefulShutdown('SIGUSR2'));
 
 // ─── Global Error Handlers ───────────────────────────────────────────────────
 process.on('uncaughtException', (error) => {
+  console.error('FATAL: Uncaught Exception:', error);
   logger.fatal('Uncaught Exception:', error);
   gracefulShutdown('uncaughtException');
 });
 
 process.on('unhandledRejection', (reason, promise) => {
+  console.error('FATAL: Unhandled Rejection at:', promise, 'reason:', reason);
   logger.fatal('Unhandled Rejection at:', promise, 'reason:', reason);
   gracefulShutdown('unhandledRejection');
 });

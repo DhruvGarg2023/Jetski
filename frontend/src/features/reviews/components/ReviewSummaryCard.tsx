@@ -69,9 +69,9 @@ export function ReviewSummaryCard({ review }: ReviewSummaryCardProps) {
                 <div className="h-2 w-full bg-black border border-white/10">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: \`\${review.overallScore}%\` }}
+                    animate={{ width: `${review.overallScore}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className={\`h-full \${review.overallScore >= 80 ? 'bg-[#00E5FF]' : 'bg-[#FF4F00]'}\`}
+                    className={`h-full ${review.overallScore >= 80 ? 'bg-[#00E5FF]' : 'bg-[#FF4F00]'}`}
                   />
                 </div>
               </div>
