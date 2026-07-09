@@ -44,7 +44,40 @@ The frontend will follow a Feature-Based Architecture under the `app/` App Route
 - **Tasks**: Apply widespread UI polish using Framer Motion for micro-animations. Implement robust skeleton loaders, empty states, 404/500 error pages, keyboard navigation, and ensure full WCAG accessibility compliance.
 
 ### Phase 10 — Frontend Testing
-- **Tasks**: Set up and write Component Tests, Integration Tests, and E2E Tests to validate the complete frontend workflow.
+**Objective**: Establish a robust testing foundation to guarantee UI reliability and prevent regressions.
+
+**1. Component & Integration Testing (Vitest + React Testing Library)**
+- **Setup**: 
+  - Install `vitest`, `@vitejs/plugin-react`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, and `@testing-library/user-event`.
+  - Configure `vitest.config.ts` to support Next.js path aliases (`@/*`).
+  - Create a setup file `setupTests.ts` for global mocks (e.g., `next/navigation`, `next-themes`, `IntersectionObserver`).
+- **Test Implementation**:
+  - Write unit tests for core UI components (e.g., `NumberTicker`, `BorderBeam`).
+  - Write integration tests for complex feature components (e.g., `ReviewSummaryCard`, `ActivityChart`), mocking `useQuery` from `@tanstack/react-query` to supply predictable data.
+
+**2. End-to-End (E2E) Testing (Playwright)**
+- **Setup**:
+  - Install `@playwright/test`.
+  - Configure `playwright.config.ts` to spin up the Next.js dev server on a specific port before running tests.
+- **Test Implementation**:
+  - Write a comprehensive E2E test suite covering:
+    - **Authentication Flow**: Login, invalid credentials, redirect behavior.
+    - **Dashboard Navigation**: Sidebar routing, ensuring key pages (Projects, Repositories, Settings, Reports) render without crashing.
+    - **Settings Persistence**: Verifying that updating the GitHub PAT correctly stores it in localStorage.
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- Run `npm run test` (Vitest) to verify all component and integration tests pass.
+- Run `npx playwright test` to verify critical user journeys simulate successfully against the running application.
+
+### Manual Verification
+- Visual inspection of all animations in both Light and Dark modes.
+- Performance profiling (Lighthouse) to ensure heavy animations are lazy-loaded and do not block the main thread.
+- Device testing to ensure the Bento Grid and complex backgrounds degrade gracefully on mobile and tablet devices.
+- Functional testing to guarantee no API integrations or React Query hooks were broken during the UI migration.
 
 ### Phase 11 — Production Optimization
 - **Tasks**: Optimize for production using Code Splitting, Lazy Loading, Image Optimization, Caching strategies, and strict metadata/SEO best practices. Conduct bundle optimization.
@@ -53,14 +86,3 @@ The frontend will follow a Feature-Based Architecture under the `app/` App Route
 - **Tasks**: Prepare for Vercel deployment by configuring environment variables, security headers, and production Socket.IO/API URLs. Document the deployment workflow.
 
 ---
-
-## Verification Plan
-
-### Automated Tests
-- Implementation of component and E2E testing framework in Phase 10.
-- Running tests continuously throughout subsequent phases to prevent regressions.
-
-### Manual Verification
-- Visual inspection of UI responsiveness, animations, and dark/light modes.
-- Manual testing of real-time Socket.IO connections and state updates during the AI Review Workflow.
-- Deployment verification against a staging/production backend setup in Phase 12.

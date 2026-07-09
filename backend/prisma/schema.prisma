@@ -10,27 +10,25 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  githubId  String?  @unique @map("github_id")
-  email     String   @unique
+  id        String    @id @default(uuid()) @db.Uuid
+  githubId  String?   @unique @map("github_id")
+  email     String    @unique
   password  String?
   name      String?
-  avatarUrl String?  @map("avatar_url")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  
+  avatarUrl String?   @map("avatar_url")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
   projects  Project[]
 
   @@map("users")
 }
 
 model Project {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
+  id           String                 @id @default(uuid()) @db.Uuid
+  userId       String                 @map("user_id") @db.Uuid
+  name         String
+  createdAt    DateTime               @default(now()) @map("created_at")
+  updatedAt    DateTime               @updatedAt @map("updated_at")
   user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   repositories RepositoryConnection[]
 
@@ -45,14 +43,65 @@ model RepositoryConnection {
   defaultBranch String   @default("main") @map("default_branch")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
-
-  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  reviews Review[]
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviews       Review[]
 
   @@unique([projectId, githubRepoId])
   @@index([fullName])
   @@index([projectId])
   @@map("repository_connections")
+}
+
+model Review {
+  id           String               @id @default(uuid()) @db.Uuid
+  repoId       String               @map("repo_id") @db.Uuid
+  status       ReviewStatus         @default(PENDING)
+  targetType   TargetType           @map("target_type")
+  targetId     String               @map("target_id")
+  summary      String?
+  overallScore Int?                 @map("overall_score")
+  grade        String?
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+  aiHistory    AiReviewHistory?
+  comments     ReviewComment[]
+  repository   RepositoryConnection @relation(fields: [repoId], references: [id], onDelete: Cascade)
+
+  @@index([targetId])
+  @@index([repoId])
+  @@map("reviews")
+}
+
+model ReviewComment {
+  id          String         @id @default(uuid()) @db.Uuid
+  reviewId    String         @map("review_id") @db.Uuid
+  filePath    String         @map("file_path")
+  lineNumber  Int?           @map("line_number")
+  category    ReviewCategory @default(Bug)
+  title       String         @default("Issue")
+  comment     String
+  suggestion  String         @default("")
+  codeSnippet String?        @map("code_snippet")
+  severity    Severity       @default(INFO)
+  confidence  Float?
+  createdAt   DateTime       @default(now()) @map("created_at")
+  review      Review         @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("review_comments")
+}
+
+model AiReviewHistory {
+  id               String   @id @default(uuid()) @db.Uuid
+  reviewId         String   @unique @map("review_id") @db.Uuid
+  promptTokens     Int      @map("prompt_tokens")
+  completionTokens Int      @map("completion_tokens")
+  modelUsed        String   @map("model_used")
+  rawResponse      Json     @map("raw_response")
+  createdAt        DateTime @default(now()) @map("created_at")
+  review           Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("ai_review_history")
 }
 
 enum ReviewStatus {
@@ -65,27 +114,6 @@ enum ReviewStatus {
 enum TargetType {
   COMMIT
   PR
-}
-
-model Review {
-  id           String       @id @default(uuid()) @db.Uuid
-  repoId       String       @map("repo_id") @db.Uuid
-  status       ReviewStatus @default(PENDING)
-  targetType   TargetType   @map("target_type")
-  targetId     String       @map("target_id")
-  summary      String?
-  overallScore Int?         @map("overall_score")
-  grade        String?
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
-
-  repository RepositoryConnection @relation(fields: [repoId], references: [id], onDelete: Cascade)
-  comments   ReviewComment[]
-  aiHistory  AiReviewHistory?
-
-  @@index([targetId])
-  @@index([repoId])
-  @@map("reviews")
 }
 
 enum Severity {
@@ -107,38 +135,4 @@ enum ReviewCategory {
   Scalability
   Reliability
   Documentation
-}
-
-model ReviewComment {
-  id          String         @id @default(uuid()) @db.Uuid
-  reviewId    String         @map("review_id") @db.Uuid
-  filePath    String         @map("file_path")
-  lineNumber  Int?           @map("line_number")
-  category    ReviewCategory @default(Bug)
-  title       String         @default("Issue")
-  comment     String
-  suggestion  String         @default("")
-  codeSnippet String?        @map("code_snippet")
-  severity    Severity       @default(INFO)
-  confidence  Float?
-  createdAt   DateTime       @default(now()) @map("created_at")
-
-  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-
-  @@index([reviewId])
-  @@map("review_comments")
-}
-
-model AiReviewHistory {
-  id               String   @id @default(uuid()) @db.Uuid
-  reviewId         String   @unique @map("review_id") @db.Uuid
-  promptTokens     Int      @map("prompt_tokens")
-  completionTokens Int      @map("completion_tokens")
-  modelUsed        String   @map("model_used")
-  rawResponse      Json     @map("raw_response")
-  createdAt        DateTime @default(now()) @map("created_at")
-
-  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-
-  @@map("ai_review_history")
 }

@@ -107,6 +107,29 @@ class ReviewRepository {
       },
     });
   }
+
+  /**
+   * Fetches recent completed reviews to be used as historical memory context
+   */
+  async getRecentCompletedReviews(repoId, limit = 3) {
+    return prisma.review.findMany({
+      where: { 
+        repoId,
+        status: 'COMPLETED'
+      },
+      select: {
+        targetId: true,
+        summary: true,
+        overallScore: true,
+        grade: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+    });
+  }
 }
 
 export default new ReviewRepository();

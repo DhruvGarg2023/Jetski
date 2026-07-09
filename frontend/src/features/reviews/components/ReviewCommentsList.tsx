@@ -14,7 +14,6 @@ interface ReviewCommentsListProps {
 export function ReviewCommentsList({ comments }: ReviewCommentsListProps) {
   const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
-  const { theme } = useTheme();
 
   const filteredComments = filterSeverity === 'ALL' 
     ? comments 
@@ -26,148 +25,138 @@ export function ReviewCommentsList({ comments }: ReviewCommentsListProps) {
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'CRITICAL': return <ShieldAlert className="h-5 w-5 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" />;
-      case 'HIGH': return <AlertTriangle className="h-5 w-5 text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]" />;
-      case 'MEDIUM': return <AlertTriangle className="h-5 w-5 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />;
-      case 'LOW': return <Info className="h-5 w-5 text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />;
-      case 'INFO': return <CheckCircle className="h-5 w-5 text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]" />;
-      default: return <Info className="h-5 w-5" />;
+      case 'CRITICAL': return <ShieldAlert className="h-4 w-4 text-[#FF4F00]" />;
+      case 'HIGH': return <AlertTriangle className="h-4 w-4 text-[#FF4F00]" />;
+      case 'MEDIUM': return <AlertTriangle className="h-4 w-4 text-[#FF9500]" />;
+      case 'LOW': return <Info className="h-4 w-4 text-[#00E5FF]" />;
+      case 'INFO': return <CheckCircle className="h-4 w-4 text-[#00E5FF]" />;
+      default: return <Info className="h-4 w-4 text-[#7E8494]" />;
     }
   };
 
-  const getSeverityBadgeColor = (severity: string) => {
+  const getSeverityTheme = (severity: string) => {
     switch (severity) {
-      case 'CRITICAL': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'HIGH': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
-      case 'MEDIUM': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'LOW': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'INFO': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Security': return <ShieldAlert className="h-3 w-3" />;
-      case 'Performance': return <Activity className="h-3 w-3" />;
-      case 'Bug': return <AlertTriangle className="h-3 w-3" />;
-      case 'Code_Style': return <LayoutTemplate className="h-3 w-3" />;
-      case 'Documentation': return <FileText className="h-3 w-3" />;
-      default: return <FileCode className="h-3 w-3" />;
+      case 'CRITICAL': 
+      case 'HIGH': 
+        return { text: 'text-[#FF4F00]', border: 'border-[#FF4F00]/30', bg: 'bg-[#FF4F00]/10', active: 'bg-[#FF4F00] text-black' };
+      case 'MEDIUM': 
+        return { text: 'text-[#FF9500]', border: 'border-[#FF9500]/30', bg: 'bg-[#FF9500]/10', active: 'bg-[#FF9500] text-black' };
+      case 'LOW': 
+      case 'INFO': 
+        return { text: 'text-[#00E5FF]', border: 'border-[#00E5FF]/30', bg: 'bg-[#00E5FF]/10', active: 'bg-[#00E5FF] text-black' };
+      default: 
+        return { text: 'text-[#7E8494]', border: 'border-[#7E8494]/30', bg: 'bg-[#7E8494]/10', active: 'bg-[#7E8494] text-black' };
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'].map(sev => (
-          <Badge 
-            key={sev}
-            variant="outline"
-            className={`cursor-pointer whitespace-nowrap transition-all duration-300 ${
-              filterSeverity === sev 
-                ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(139,92,246,0.5)] border-primary' 
-                : 'hover:bg-primary/10 hover:border-primary/30'
-            }`}
-            onClick={() => setFilterSeverity(sev)}
-          >
-            {sev === 'ALL' ? 'All Issues' : sev}
-            <span className={`ml-2 text-xs rounded-full px-1.5 py-0.5 ${
-              filterSeverity === sev ? 'bg-black/20' : 'bg-muted-foreground/20'
-            }`}>
-              {sev === 'ALL' ? comments.length : comments.filter(c => c.severity === sev).length}
-            </span>
-          </Badge>
-        ))}
+      {/* Structural Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-y border-white/10 bg-[#181A20] px-4 py-2">
+        <div className="text-xs font-mono text-[#7E8494] uppercase tracking-widest flex items-center gap-2">
+          <span>Filter_Diagnostic_Logs</span>
+        </div>
+        <div className="flex items-center gap-1 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide w-full sm:w-auto mt-2 sm:mt-0">
+          {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'].map(sev => {
+            const isActive = filterSeverity === sev;
+            const theme = sev !== 'ALL' ? getSeverityTheme(sev) : { text: 'text-[#F3F4F6]', active: 'bg-[#F3F4F6] text-black' };
+            const count = sev === 'ALL' ? comments.length : comments.filter(c => c.severity === sev).length;
+            
+            return (
+              <button 
+                key={sev}
+                onClick={() => setFilterSeverity(sev)}
+                className={`text-xs font-mono uppercase tracking-wider px-3 py-1.5 transition-colors border border-transparent ${
+                  isActive 
+                    ? `${theme.active}` 
+                    : `text-[#7E8494] hover:border-white/10 hover:bg-white/5`
+                }`}
+              >
+                {sev} [{count}]
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {filteredComments.length === 0 ? (
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center p-12 border-2 border-dashed border-white/10 rounded-xl bg-background/30 backdrop-blur-sm text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center p-12 border border-white/10 bg-[#0F1014] text-[#7E8494]"
         >
-          <CheckCircle className="h-12 w-12 text-green-500/50 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground">All Clear</h3>
-          <p>No issues found for this filter combination.</p>
+          <div className="font-mono text-sm tracking-widest uppercase">No_Anomalies_Detected</div>
+          <div className="text-xs mt-2 opacity-70">The system found no issues matching this filter criteria.</div>
         </motion.div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-[1px] bg-white/10">
           <AnimatePresence>
             {filteredComments.map((comment, index) => {
               const isExpanded = expandedComments[comment.id] || false;
+              const theme = getSeverityTheme(comment.severity);
               
               return (
                 <motion.div 
                   key={comment.id} 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="border border-white/10 rounded-xl bg-background/50 backdrop-blur-md overflow-hidden shadow-sm transition-all hover:border-white/20 hover:shadow-md"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-[#0F1014] overflow-hidden"
                 >
+                  {/* Log Row Header */}
                   <div 
-                    className="p-4 bg-white/5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 cursor-pointer hover:bg-white/10 transition-colors"
+                    className="p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer hover:bg-[#181A20] transition-colors group"
                     onClick={() => toggleExpand(comment.id)}
                   >
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="mt-1">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="mt-1 shrink-0">
                         {getSeverityIcon(comment.severity)}
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-foreground text-base pr-4 leading-tight">{comment.title}</h4>
-                        <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1.5 bg-black/30 px-2 py-1 rounded-md border border-white/5 font-mono">
-                            <FileCode className="h-3 w-3" />
-                            {comment.filePath}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className={`text-[10px] font-mono tracking-widest uppercase px-1.5 py-0.5 border ${theme.border} ${theme.text} ${theme.bg}`}>
+                            {comment.severity}
                           </span>
-                          {comment.lineNumber && (
-                            <span className="bg-black/30 px-2 py-1 rounded-md border border-white/5 font-mono">
-                              Line {comment.lineNumber}
-                            </span>
-                          )}
+                          <span className="text-[10px] font-mono text-[#7E8494] uppercase tracking-widest border border-white/10 px-1.5 py-0.5">
+                            {comment.category.replace('_', ' ')}
+                          </span>
+                          <span className="text-[11px] font-mono text-[#7E8494] truncate">
+                            {comment.filePath}{comment.lineNumber ? `:${comment.lineNumber}` : ''}
+                          </span>
                         </div>
+                        <h4 className="font-sans font-medium text-[#F3F4F6] text-sm leading-tight group-hover:text-white transition-colors">{comment.title}</h4>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 mt-2 sm:mt-0">
-                      <Badge variant="outline" className="flex items-center gap-1.5 border-white/10 bg-black/20">
-                        {getCategoryIcon(comment.category)}
-                        {comment.category.replace('_', ' ')}
-                      </Badge>
-                      <Badge variant="outline" className={`${getSeverityBadgeColor(comment.severity)} uppercase font-bold tracking-wider text-[10px]`}>
-                        {comment.severity}
-                      </Badge>
+                    <div className="shrink-0 flex items-center justify-end">
                       <ChevronDown 
-                        className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                        className={`h-4 w-4 text-[#7E8494] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
                       />
                     </div>
                   </div>
                   
+                  {/* Log Row Detail (Expanded) */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
+                        transition={{ duration: 0.2 }}
                       >
-                        <div className="p-5 space-y-5 border-t border-white/5 bg-black/20">
-                          <div className="text-sm text-gray-300 leading-relaxed">
+                        <div className="p-6 pt-2 pb-8 border-t border-white/5 bg-[#13141B] ml-8 space-y-6">
+                          <div className="text-[14px] text-[#F3F4F6] font-sans leading-relaxed opacity-90">
                             {comment.comment}
                           </div>
                           
                           {comment.codeSnippet && (
-                            <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl">
-                              <div className="bg-[#1e1e1e] px-4 py-2 text-xs font-mono border-b border-white/10 text-gray-400 flex items-center justify-between">
-                                <span className="flex items-center gap-2">
-                                  <FileCode className="h-3 w-3" /> Problematic Code
-                                </span>
+                            <div className="border border-white/10 bg-black">
+                              <div className="px-3 py-1.5 text-[10px] font-mono text-[#7E8494] uppercase tracking-widest border-b border-white/10 bg-[#0F1014]">
+                                _Source_Trace
                               </div>
                               <SyntaxHighlighter 
                                 language="typescript" 
                                 style={vscDarkPlus}
-                                customStyle={{ margin: 0, padding: '1rem', borderRadius: 0, fontSize: '0.85rem', backgroundColor: '#1e1e1e' }}
+                                customStyle={{ margin: 0, padding: '1rem', borderRadius: 0, fontSize: '0.8rem', backgroundColor: '#000000' }}
                               >
                                 {comment.codeSnippet}
                               </SyntaxHighlighter>
@@ -175,12 +164,11 @@ export function ReviewCommentsList({ comments }: ReviewCommentsListProps) {
                           )}
           
                           {comment.suggestion && (
-                            <div className="relative overflow-hidden bg-primary/5 border border-primary/20 p-5 rounded-xl">
-                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
-                              <h5 className="text-sm font-semibold mb-2 text-primary flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4" /> Recommended Fix
+                            <div className="border-l-2 border-[#00E5FF] pl-4 py-1">
+                              <h5 className="text-[10px] font-mono uppercase tracking-widest text-[#00E5FF] mb-2">
+                                _Resolution_Protocol
                               </h5>
-                              <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                              <div className="text-[14px] text-[#F3F4F6] font-sans whitespace-pre-wrap leading-relaxed opacity-90">
                                 {comment.suggestion}
                               </div>
                             </div>

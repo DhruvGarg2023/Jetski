@@ -1,9 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReviewResponse } from '../types';
-import { Progress } from '@/components/ui/progress';
-import { BorderBeam } from '@/components/magicui/border-beam';
-import { NumberTicker } from '@/components/magicui/number-ticker';
 import { motion } from 'framer-motion';
 
 interface ReviewSummaryCardProps {
@@ -11,72 +8,84 @@ interface ReviewSummaryCardProps {
 }
 
 export function ReviewSummaryCard({ review }: ReviewSummaryCardProps) {
-  const getGradeColor = (grade: string) => {
+  const getGradeTheme = (grade: string) => {
     switch (grade?.toUpperCase()) {
-      case 'A': return 'text-green-500 drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]';
-      case 'B': return 'text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]';
-      case 'C': return 'text-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.5)]';
-      case 'D': return 'text-orange-500 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]';
-      case 'F': return 'text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]';
-      default: return 'text-muted-foreground';
+      case 'A': 
+      case 'B': 
+        return { color: 'text-[#00E5FF]', border: 'border-[#00E5FF]/30', bg: 'bg-[#00E5FF]/10' };
+      case 'C': 
+      case 'D': 
+      case 'F': 
+        return { color: 'text-[#FF4F00]', border: 'border-[#FF4F00]/30', bg: 'bg-[#FF4F00]/10' };
+      default: 
+        return { color: 'text-[#7E8494]', border: 'border-[#7E8494]/30', bg: 'bg-[#7E8494]/10' };
     }
   };
 
-  const getScoreColorClass = (score: number) => {
-    if (score >= 90) return 'bg-green-500';
-    if (score >= 80) return 'bg-blue-500';
-    if (score >= 70) return 'bg-yellow-500';
-    if (score >= 60) return 'bg-orange-500';
-    return 'bg-red-500';
-  };
+  const gradeTheme = getGradeTheme(review.grade || '');
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="group relative"
+      transition={{ duration: 0.4 }}
     >
-      <Card className="shadow-md bg-background/50 backdrop-blur-md border-white/10 overflow-hidden relative">
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-          <BorderBeam size={400} duration={12} delay={0} />
-        </div>
-        <CardHeader className="relative z-10">
-          <CardTitle className="flex justify-between items-center text-xl">
-            <span>Executive Summary</span>
-            {review.grade && (
-              <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 shadow-inner">
-                <span className="text-sm font-medium text-muted-foreground">Grade</span>
-                <span className={`text-3xl font-black ${getGradeColor(review.grade)}`}>
-                  {review.grade}
-                </span>
-              </div>
-            )}
-          </CardTitle>
-          <CardDescription className="text-base">Overall AI assessment of these changes.</CardDescription>
+      <Card className="rounded-none border border-white/10 bg-[#0F1014] shadow-none overflow-hidden relative">
+        <CardHeader className="border-b border-white/10 bg-[#181A20] p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <CardTitle className="text-xs font-mono text-[#7E8494] tracking-widest uppercase mb-1">
+              Diagnostic_Readout //
+            </CardTitle>
+            <h2 className="text-xl font-medium tracking-tight text-[#F3F4F6]">Executive Summary</h2>
+          </div>
+          
+          {review.grade && (
+            <div className={`flex flex-col items-end border-l-4 ${gradeTheme.border} pl-4`}>
+              <span className="text-[10px] font-mono tracking-widest uppercase text-[#7E8494]">Overall_Grade</span>
+              <span className={`text-4xl font-mono font-bold leading-none mt-1 ${gradeTheme.color}`}>
+                [{review.grade}]
+              </span>
+            </div>
+          )}
         </CardHeader>
-        <CardContent className="space-y-8 relative z-10">
+        
+        <CardContent className="p-0 flex flex-col md:flex-row">
+          {/* Score Matrix Sidebar */}
           {review.overallScore !== undefined && (
-            <div className="space-y-3 bg-white/5 p-5 rounded-xl border border-white/5">
-              <div className="flex justify-between items-baseline text-sm font-medium">
-                <span className="text-muted-foreground uppercase tracking-wider text-xs font-semibold">Quality Score</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold font-mono">
-                    <NumberTicker value={review.overallScore} />
-                  </span>
-                  <span className="text-muted-foreground font-mono">/100</span>
+            <div className="w-full md:w-48 border-b md:border-b-0 md:border-r border-white/10 bg-[#181A20]/50 p-6 flex flex-col justify-center shrink-0">
+              <span className="text-xs font-mono text-[#7E8494] tracking-widest uppercase mb-2 block">System_Score</span>
+              <div className="flex items-baseline gap-1">
+                <span className={`text-5xl font-mono font-black ${review.overallScore >= 80 ? 'text-[#00E5FF]' : 'text-[#FF4F00]'}`}>
+                  {review.overallScore}
+                </span>
+                <span className="text-sm font-mono text-[#7E8494]">/100</span>
+              </div>
+              <div className="mt-6 flex flex-col gap-1">
+                {/* ASCII styled progress bar */}
+                <div className="flex justify-between text-[10px] font-mono text-[#7E8494] mb-1">
+                  <span>[0]</span>
+                  <span>[100]</span>
+                </div>
+                <div className="h-2 w-full bg-black border border-white/10">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: \`\${review.overallScore}%\` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className={\`h-full \${review.overallScore >= 80 ? 'bg-[#00E5FF]' : 'bg-[#FF4F00]'}\`}
+                  />
                 </div>
               </div>
-              <Progress 
-                value={review.overallScore} 
-                className="h-3 rounded-full overflow-hidden bg-black/40 shadow-inner" 
-                indicatorClassName={getScoreColorClass(review.overallScore)}
-              />
             </div>
           )}
           
-          <div className="bg-black/30 p-6 rounded-xl border border-white/5 whitespace-pre-wrap text-[15px] leading-relaxed text-gray-300 shadow-inner backdrop-blur-sm">
-            {review.summary || "No summary provided."}
+          {/* Summary Narrative */}
+          <div className="p-6 md:p-8 flex-1">
+            <div className="font-mono text-xs text-[#7E8494] mb-4 tracking-widest uppercase">
+              {'>'} Analysis_Log
+            </div>
+            <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#F3F4F6] font-sans opacity-90">
+              {review.summary || "No diagnostic summary provided by the system."}
+            </div>
           </div>
         </CardContent>
       </Card>

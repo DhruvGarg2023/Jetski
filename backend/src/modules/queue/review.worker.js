@@ -34,16 +34,27 @@ export const processReviewJob = async (jobData) => {
       throw new Error('The diff is too large for AI review. Please break it down.');
     }
 
-    // 2. Call AI Service with the full diff
+    // 2. Fetch Historical Memory Context
+    socketService.emitToUser(userId, 'review:progress', { message: 'Fetching historical repository context...' });
+    const recentReviews = await reviewRepository.getRecentCompletedReviews(repoId, 3);
+    let memoryContext = '';
+    if (recentReviews && recentReviews.length > 0) {
+      memoryContext = recentReviews.map((r, i) => 
+        `Past Review ${i+1} (${r.createdAt.toISOString().split('T')[0]}):\n- Score: ${r.overallScore}\n- Grade: ${r.grade}\n- Summary: ${r.summary}`
+      ).join('\n\n');
+      childLogger.info(`Injected ${recentReviews.length} past reviews into memory context.`);
+    }
+
+    // 3. Call AI Service with the full diff and memory
     socketService.emitToUser(userId, 'review:progress', { message: 'Analyzing code with AI...' });
     
-    const aiResult = await aiService.generateCodeReview(diff);
+    const aiResult = await aiService.generateCodeReview(diff, memoryContext);
 
-    // 3. Aggregate Results
+    // 4. Aggregate Results
     const aggregatedResult = {
       summary: aiResult.summary,
       overallScore: aiResult.overallScore,
-      grade: 'A', // Will calculate below
+      grade: aiResult.grade, // Use AI's grade directly instead of recalculating manually
       comments: aiResult.comments,
       usage: {
         promptTokens: aiResult.usage.promptTokens,
@@ -53,14 +64,9 @@ export const processReviewJob = async (jobData) => {
       }
     };
 
-    // Calculate Grade based on aggregated score
-    if (aggregatedResult.overallScore >= 90) aggregatedResult.grade = 'A';
-    else if (aggregatedResult.overallScore >= 80) aggregatedResult.grade = 'B';
-    else if (aggregatedResult.overallScore >= 70) aggregatedResult.grade = 'C';
-    else if (aggregatedResult.overallScore >= 60) aggregatedResult.grade = 'D';
-    else aggregatedResult.grade = 'F';
 
-    // 4. Save the results to the database atomically (Update existing pending review)
+
+    // 5. Save the results to the database atomically
     socketService.emitToUser(userId, 'review:progress', { message: 'Saving results to database...' });
     
     await reviewRepository.updateReviewWithComments(reviewId, aggregatedResult);

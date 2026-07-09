@@ -45,8 +45,12 @@ Categories must be one of: Security, Performance, Bug, Readability, Maintainabil
 Severities must be one of: INFO, LOW, MEDIUM, HIGH, CRITICAL.
 `;
 
-export const buildReviewPrompt = (diff) => {
-  return `${SYSTEM_INSTRUCTION}
+export const buildReviewPrompt = (diff, memoryContext = "") => {
+  const memorySection = memoryContext 
+    ? `\n\n--- HISTORICAL REPOSITORY CONTEXT ---\nThe AI previously reviewed this repository with the following results:\n${memoryContext}\nUse this historical context to adjust your strictness. For example, if a specific bug (e.g., SQL injection) occurred in past reviews, be much harsher if it appears again.\n`
+    : "";
+
+  return `${SYSTEM_INSTRUCTION}${memorySection}
 
 --- GIT DIFF START ---
 ${diff}

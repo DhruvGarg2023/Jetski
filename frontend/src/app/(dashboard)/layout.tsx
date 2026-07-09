@@ -24,7 +24,7 @@ export default function DashboardLayout({
 
   // AuthProvider will already redirect, but just as a safety net:
   if (!user) {
-    return null; 
+    return null;
   }
 
   return (

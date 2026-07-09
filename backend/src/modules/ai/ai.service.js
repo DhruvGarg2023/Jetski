@@ -28,10 +28,22 @@ class AIService {
   /**
    * Generates a code review with automatic retries and JSON validation
    * @param {string} diff - The git diff to review
+   * @param {string} memoryContext - Historical context of previous reviews
    * @param {number} maxRetries - Maximum number of retries if AI fails or hallucinates
    */
-  async generateCodeReview(diff, maxRetries = 2) {
-    const prompt = buildReviewPrompt(diff);
+  async generateCodeReview(diff, memoryContext = "", maxRetries = 2) {
+    // Input Guardrail: Redact sensitive secrets from the diff
+    let safeDiff = diff;
+    const secretPatterns = [
+      /ghp_[a-zA-Z0-9]{36}/g, // GitHub PAT
+      /AKIA[0-9A-Z]{16}/g, // AWS Access Key
+      /-----BEGIN (?:RSA|OPENSSH|PRIVATE) KEY-----[a-zA-Z0-9\/\+\=\s]+-----END (?:RSA|OPENSSH|PRIVATE) KEY-----/g // Private Keys
+    ];
+    secretPatterns.forEach(pattern => {
+      safeDiff = safeDiff.replace(pattern, '[REDACTED_SECRET]');
+    });
+
+    const prompt = buildReviewPrompt(safeDiff, memoryContext);
     let attempt = 0;
     let lastError = null;
 
@@ -60,6 +72,19 @@ class AIService {
         if (!validation.success) {
           throw new AppError(`AI JSON schema mismatch: ${validation.error.message}`, 502);
         }
+
+        // Output Guardrail: Anti-Hallucination Filter
+        // Ensure that the file paths mentioned in comments actually exist in the diff.
+        // The diff contains "diff --git a/filepath b/filepath" or "+++ b/filepath"
+        const validComments = validation.data.comments.filter(comment => {
+          // A very relaxed check: does the filename exist anywhere in the diff string?
+          // This prevents complete hallucinations of unrelated files.
+          const fileName = comment.filePath.split('/').pop();
+          return safeDiff.includes(fileName);
+        });
+        
+        validation.data.comments = validComments;
+        validation.data.statistics.total = validComments.length;
 
         // Success!
         return {

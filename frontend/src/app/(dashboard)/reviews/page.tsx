@@ -4,10 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { projectsService } from '@/features/projects/projects.service';
 import { ReviewHistoryCard } from '@/features/reviews/components/ReviewHistoryCard';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, SlidersHorizontal, FileText } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Search, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ReviewHistoryPage() {
@@ -20,7 +17,6 @@ export default function ReviewHistoryPage() {
     queryFn: () => projectsService.getProjects(),
   });
 
-  // Extract and enrich all reviews from projects
   const { allReviews, uniqueRepos } = useMemo(() => {
     if (!projects) return { allReviews: [], uniqueRepos: [] };
 
@@ -43,12 +39,10 @@ export default function ReviewHistoryPage() {
       }
     });
 
-    // Sort by newest first
     reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return { allReviews: reviews, uniqueRepos: Array.from(repos) };
   }, [projects]);
 
-  // Apply filters and search
   const filteredReviews = useMemo(() => {
     return allReviews.filter(review => {
       const matchesSearch = 
@@ -64,101 +58,90 @@ export default function ReviewHistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 max-w-5xl mx-auto w-full pb-10">
-        <div>
-          <Skeleton className="h-10 w-48 mb-2" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-        <Skeleton className="h-16 w-full" />
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
-        </div>
+      <div className="flex h-[50vh] flex-col items-center justify-center font-mono text-[#7E8494]">
+        <div className="animate-pulse mb-4 text-[#00E5FF]">|</div>
+        <span>[ INITIATING_DATABASE_QUERY ]</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6 text-center">
-        <h3 className="text-xl font-semibold text-red-500 mb-2">Error Loading Reviews</h3>
-        <p className="text-muted-foreground">{(error as any)?.message || "Could not fetch review history."}</p>
+      <div className="p-8 border border-[#FF4F00]/30 bg-[#FF4F00]/5 max-w-2xl mx-auto mt-12">
+        <h3 className="text-sm font-mono font-bold text-[#FF4F00] uppercase tracking-widest mb-2">System_Error</h3>
+        <p className="text-[#F3F4F6] font-sans">
+          {(error as any)?.message || "Could not retrieve review history records."}
+        </p>
       </div>
     );
   }
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="space-y-6 max-w-5xl mx-auto w-full pb-10"
+      className="space-y-8 max-w-5xl mx-auto w-full pb-10 pt-4"
     >
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Review History</h1>
-        <p className="text-muted-foreground mt-2">
-          Browse and filter your past AI code reviews across all repositories.
+      <div className="border-b border-white/10 pb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-[#F3F4F6]">Diagnostic History</h1>
+        <p className="text-[#7E8494] mt-2 font-sans text-sm">
+          Archived AI codebase analysis reports.
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-center bg-card p-4 rounded-lg border shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-[#181A20] p-3 border border-white/10">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by repo or commit SHA..."
-            className="pl-9 w-full"
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#7E8494]" />
+          <input
+            placeholder="Query by repo or SHA..."
+            className="pl-10 w-full bg-[#0F1014] border border-white/10 text-sm font-mono text-[#F3F4F6] py-2 px-3 focus:outline-none focus:border-[#00E5FF]/50 transition-colors placeholder:text-[#7E8494]/50"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         
-        <div className="flex gap-4 w-full sm:w-auto">
-          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val || 'ALL')}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Statuses</SelectItem>
-              <SelectItem value="COMPLETED">Completed</SelectItem>
-              <SelectItem value="PENDING">Pending</SelectItem>
-              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-              <SelectItem value="FAILED">Failed</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-3 w-full sm:w-auto">
+          <select 
+            className="bg-[#0F1014] border border-white/10 text-xs font-mono text-[#7E8494] py-2.5 px-3 uppercase tracking-widest focus:outline-none focus:border-[#00E5FF]/50"
+            value={statusFilter} 
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="ALL">Status: ALL</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="PENDING">PENDING</option>
+            <option value="IN_PROGRESS">IN_PROGRESS</option>
+            <option value="FAILED">FAILED</option>
+          </select>
 
-          <Select value={repoFilter} onValueChange={(val) => setRepoFilter(val || 'ALL')}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Repository" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Repositories</SelectItem>
-              {uniqueRepos.map(repo => (
-                <SelectItem key={repo} value={repo}>{repo}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select 
+            className="bg-[#0F1014] border border-white/10 text-xs font-mono text-[#7E8494] py-2.5 px-3 uppercase tracking-widest focus:outline-none focus:border-[#00E5FF]/50 max-w-[200px]"
+            value={repoFilter} 
+            onChange={(e) => setRepoFilter(e.target.value)}
+          >
+            <option value="ALL">Repo: ALL</option>
+            {uniqueRepos.map(repo => (
+              <option key={repo} value={repo}>{repo.split('/')[1] || repo}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>Showing {filteredReviews.length} review{filteredReviews.length !== 1 ? 's' : ''}</span>
+      <div className="flex items-center justify-between text-[10px] font-mono text-[#7E8494] uppercase tracking-widest">
+        <span>Records_Found: [{filteredReviews.length}]</span>
       </div>
 
       {filteredReviews.length === 0 ? (
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center p-12 border-2 border-dashed rounded-xl bg-muted/20 flex flex-col items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center p-16 border border-white/10 bg-[#0F1014]"
         >
-          <div className="rounded-full bg-primary/10 p-4 mb-4">
-            <FileText className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-medium">No reviews found</h3>
-          <p className="text-muted-foreground mt-1 max-w-sm">Try adjusting your filters, searching for a different term, or initiate a new code review.</p>
+          <div className="font-mono text-sm tracking-widest uppercase text-[#7E8494] mb-2">Null_Result</div>
+          <p className="text-xs text-[#7E8494]/70 font-sans">Adjust query parameters to expand search space.</p>
         </motion.div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-[1px] bg-white/10 border border-white/10">
           {filteredReviews.map(review => (
             <ReviewHistoryCard key={review.id} review={review} />
           ))}

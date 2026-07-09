@@ -1,0 +1,63 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Docker Compose — Database and Infrastructure Only
+# ─────────────────────────────────────────────────────────────────────────────
+# This file orchestrates the infrastructure services needed to run the application locally.
+# Usage:
+#   docker compose up              → Start all services
+#   docker compose up -d           → Start in detached mode
+#   docker compose down            → Stop all services
+#   docker compose down -v         → Stop and remove volumes (reset data)
+#   docker compose logs -f         → Follow all logs
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PostgreSQL Database ──────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: jetski_postgres
+    ports:
+      # Exposed to host on 5440 to avoid conflict with local postgres
+      - "5440:5432"
+    environment:
+      POSTGRES_USER: jetski_user
+      POSTGRES_PASSWORD: jetski_pass
+      POSTGRES_DB: jetski_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jetski_user -d jetski_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - jetski_network
+
+  # ── Redis (Placeholder for Future Scalability) ───────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: jetski_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - jetski_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  jetski_network:
+    driver: bridge
