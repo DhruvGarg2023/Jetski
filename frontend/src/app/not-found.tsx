@@ -14,7 +14,7 @@ export default function NotFound() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="text-center space-y-8 max-w-md relative z-10 p-8 rounded-3xl bg-background/50 backdrop-blur-xl border border-white/10 shadow-2xl"
+        className="text-center space-y-8 max-w-md relative z-10 p-10 rounded-[2rem] glass shadow-2xl border border-white/10"
       >
         <motion.div 
           animate={{ y: [0, -10, 0] }}
@@ -27,18 +27,18 @@ export default function NotFound() {
         </motion.div>
         
         <div className="space-y-3">
-          <h1 className="text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-chart-2">404</h1>
+          <h1 className="text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-primary via-chart-2 to-emerald-500">404</h1>
           <h2 className="text-3xl font-bold tracking-tight">Page not found</h2>
           <p className="text-muted-foreground text-lg">
             Oops! The page you're looking for doesn't exist or has been moved into the void.
           </p>
         </div>
 
-        <div className="pt-6 flex justify-center gap-4">
-          <Link href="javascript:history.back()" className={buttonVariants({ variant: "outline", size: "lg" })}>
+        <div className="pt-6 flex flex-col sm:flex-row justify-center gap-4">
+          <Link href="javascript:history.back()" className={buttonVariants({ variant: "outline", size: "lg", className: "w-full sm:w-auto rounded-xl border-white/10" })}>
             Go Back
           </Link>
-          <Link href="/dashboard" className={buttonVariants({ size: "lg", className: "shadow-lg shadow-primary/25" })}>
+          <Link href="/dashboard" className={buttonVariants({ size: "lg", className: "w-full sm:w-auto rounded-xl shadow-lg shadow-primary/25 hover-glow" })}>
             Back to Dashboard
           </Link>
         </div>

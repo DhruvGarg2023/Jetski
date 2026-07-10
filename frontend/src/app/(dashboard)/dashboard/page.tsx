@@ -9,8 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Project, Review } from "@/features/projects/types";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { useAuth } from "@/providers/auth-provider";
+import { Sparkles } from "lucide-react";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ["projects"],
     queryFn: () => projectsService.getProjects(),
@@ -21,7 +24,7 @@ export default function DashboardPage() {
   let totalRepos = 0;
   let totalReviews = 0;
   let recentReviewsList: Review[] = [];
-  let chartDataMap: Record<string, number> = {};
+  let chartDataMap: Record<string, { count: number, timestamp: number }> = {};
 
   if (projects) {
     totalProjects = projects.length;
@@ -43,8 +46,12 @@ export default function DashboardPage() {
             
             // Aggregate for chart
             repo.reviews.forEach((review) => {
-              const dateStr = format(new Date(review.createdAt), "MMM dd");
-              chartDataMap[dateStr] = (chartDataMap[dateStr] || 0) + 1;
+              const dateObj = new Date(review.createdAt);
+              const dateKey = format(dateObj, "yyyy-MM-dd");
+              if (!chartDataMap[dateKey]) {
+                chartDataMap[dateKey] = { count: 0, timestamp: dateObj.getTime() };
+              }
+              chartDataMap[dateKey].count += 1;
             });
           }
         });
@@ -58,29 +65,27 @@ export default function DashboardPage() {
   const topRecentReviews = recentReviewsList.slice(0, 10);
   
   // Format chart data
-  const chartData = Object.keys(chartDataMap).map(date => ({
-    date,
-    count: chartDataMap[date]
-  })).sort((a, b) => {
-    // Basic string sort works for MMM dd if in same year, but in a real app you'd parse real dates.
-    // For now we trust it or sort by timestamp
-    return 1; // Simplified for this phase
-  });
+  const chartData = Object.values(chartDataMap)
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .map(data => ({
+      date: format(new Date(data.timestamp), "MMM dd"),
+      count: data.count
+    }));
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 w-full pb-10">
         <div className="flex items-center justify-between space-y-2">
-          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-12 w-64 rounded-xl shimmer" />
         </div>
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-[120px] rounded-xl" />
+            <Skeleton key={i} className="h-[140px] rounded-2xl shimmer" />
           ))}
         </div>
         <div className="grid gap-4 md:gap-8 lg:grid-cols-7">
-          <Skeleton className="h-[400px] col-span-4 rounded-xl" />
-          <Skeleton className="h-[400px] col-span-3 rounded-xl" />
+          <Skeleton className="h-[400px] col-span-4 rounded-2xl shimmer" />
+          <Skeleton className="h-[400px] col-span-3 rounded-2xl shimmer" />
         </div>
       </div>
     );
@@ -88,12 +93,14 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[50vh] text-center">
-        <div className="text-red-500 font-semibold mb-2">Error loading dashboard data</div>
+      <div className="flex flex-col items-center justify-center h-[50vh] text-center glass rounded-2xl max-w-md mx-auto mt-10 p-8 border-destructive/20">
+        <div className="text-destructive font-bold text-lg mb-2">Error loading dashboard</div>
         <p className="text-muted-foreground text-sm">{(error as any).message}</p>
       </div>
     );
   }
+
+  const firstName = user?.name?.split(" ")[0] || "Developer";
 
   return (
     <motion.div 
@@ -102,8 +109,22 @@ export default function DashboardPage() {
       transition={{ duration: 0.4 }}
       className="flex flex-col gap-6 w-full pb-10"
     >
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
+        <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3 border border-primary/20"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Workspace Ready
+          </motion.div>
+          <h2 className="text-3xl font-black tracking-tighter">
+            Welcome back, <span className="gradient-text">{firstName}</span>
+          </h2>
+          <p className="text-muted-foreground mt-1">Here is what is happening with your code today.</p>
+        </div>
       </div>
       
       <StatCards 

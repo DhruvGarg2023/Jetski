@@ -1,0 +1,448 @@
+# Premium UI/UX Upgrade — Jetski AI Code Reviewer
+
+Transform the existing functional frontend into a world-class SaaS developer platform while preserving 100% backend compatibility.
+
+> [!IMPORTANT]
+> **Zero backend changes.** All upgrades are purely UI/UX. Every existing React Query hook, Socket.IO listener, Axios call, auth flow, and route remains untouched.
+
+---
+
+## Scope & Constraints
+
+- **DO NOT** modify: `services/`, `providers/`, feature `.service.ts` files, `types.ts` files, or routing structure
+- **DO NOT** change any `useMutation`, `useQuery`, Socket.IO event handlers, or auth logic
+- **ONLY** upgrade the visual layer: components, styles, animations, and new UI-only features
+
+---
+
+## Phase 1 — Foundation & Design System
+
+### 1.1 Install Dependencies
+
+Install new packages for premium UI components:
+
+```
+npm install cmdk @radix-ui/react-tooltip @radix-ui/react-scroll-area
+```
+
+> [!NOTE]
+> We already have `framer-motion`, `lucide-react`, `recharts`, `sonner`, `next-themes`, and `shadcn`. No need to reinstall those.
+
+### 1.2 Enhanced Global Styles & CSS Variables
+
+#### [MODIFY] [globals.css](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/globals.css)
+
+- Add CSS custom properties for glassmorphism, gradient meshes, and glow effects
+- Add utility classes for glass cards, animated gradients, shimmer effects
+- Add smooth scrollbar styling
+- Add selection color theming
+- Keep all existing CSS variables and shadcn theme tokens intact
+
+### 1.3 New Shared UI Components
+
+#### [NEW] `src/components/ui/command.tsx`
+- shadcn Command (cmdk) component for the Command Palette
+
+#### [NEW] `src/components/ui/tooltip.tsx`
+- shadcn Tooltip for hover info throughout the app
+
+#### [NEW] `src/components/ui/scroll-area.tsx`
+- shadcn ScrollArea for premium scrollable regions
+
+---
+
+## Phase 2 — Landing Page (New)
+
+Currently `page.tsx` just redirects to `/dashboard`. We'll create a proper landing page that redirects authenticated users but shows a premium landing for unauthenticated visitors.
+
+#### [MODIFY] [page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/page.tsx)
+- Replace simple redirect with a client component that checks auth state
+- Show landing page for unauthenticated users, redirect to `/dashboard` for authenticated users
+
+#### [NEW] `src/components/landing/LandingPage.tsx`
+- Premium hero section with animated gradient text, spotlight effect
+- Feature grid with interactive cards and hover glow
+- Social proof / stats section with NumberTicker
+- CTA section with animated buttons
+- Footer with links
+- Uses Aurora Background from existing Aceternity component
+
+---
+
+## Phase 3 — Authentication Pages Enhancement
+
+### 3.1 Auth Layout Upgrade
+
+#### [MODIFY] [layout.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(auth)/layout.tsx)
+- Add floating particles/grid overlay behind the Aurora background
+- Add Jetski AI branding with animated logo
+- Add subtle animated border on the card container
+
+### 3.2 Login Page
+
+#### [MODIFY] [page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(auth)/login/page.tsx)
+- Add glassmorphism card styling (`bg-background/60 backdrop-blur-xl border-white/10`)
+- Add animated input focus states with glow
+- Add shine effect on the submit button
+- Add animated gradient on card header
+- Add animated logo/icon at the top
+- Preserve: form logic, validation, `useMutation`, `useAuth`, error handling
+
+### 3.3 Register Page
+
+#### [MODIFY] [page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(auth)/register/page.tsx)
+- Same glassmorphism treatment as Login
+- Animated progress indicator for form steps
+- Preserve: all form logic, mutation, auth flow
+
+### 3.4 Forgot Password Page
+
+#### [MODIFY] [page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(auth)/forgot-password/page.tsx)
+- Glassmorphism card
+- Animated success state with check animation
+- Preserve: all form logic
+
+---
+
+## Phase 4 — Dashboard Layout & Navigation
+
+### 4.1 Sidebar Redesign
+
+#### [MODIFY] [Sidebar.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/dashboard/components/Sidebar.tsx)
+- Add animated gradient logo/brand mark
+- Add hover glow effect on nav items with animated indicator bar
+- Add collapsible sidebar with smooth animation
+- Add "Pro" badge or version indicator
+- Add socket connection status indicator (green dot)
+- Preserve: all navigation items, routing, pathname matching
+
+### 4.2 Topbar Redesign
+
+#### [MODIFY] [Topbar.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/dashboard/components/Topbar.tsx)
+- Add global search bar placeholder with `⌘K` shortcut hint
+- Add breadcrumb navigation
+- Add animated notification bell (placeholder, UI only)
+- Add theme toggle button in topbar
+- Preserve: user dropdown, logout, mobile sheet menu, auth integration
+
+### 4.3 Dashboard Layout
+
+#### [MODIFY] [(dashboard)/layout.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/layout.tsx)
+- Replace DotBackground with animated gradient mesh background
+- Add page transition wrapper using Framer Motion `AnimatePresence`
+- Preserve: auth guard, Sidebar, Topbar, loading state
+
+---
+
+## Phase 5 — Command Palette (⌘K)
+
+#### [NEW] `src/components/command-palette/CommandPalette.tsx`
+- Uses `cmdk` library
+- Keyboard shortcut: `Ctrl+K` / `⌘K`
+- Sections: Navigation, Reviews, Settings, Theme
+- Navigation: Dashboard (G D), Repositories (G R), Reviews (G H), Settings (G S)
+- Actions: New Review (N R), Toggle Theme, Help (?)
+- Search through pages and recent reviews
+
+#### [MODIFY] [providers/index.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/providers/index.tsx)
+- Add CommandPalette component to the provider tree (UI-only, no backend deps)
+
+---
+
+## Phase 6 — Dashboard Page
+
+#### [MODIFY] [dashboard/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/dashboard/page.tsx)
+- Add animated page header with gradient text
+- Add welcome banner with user name
+- Add staggered entrance animations for cards
+- Replace skeleton loading with dedicated DashboardSkeleton
+- Preserve: all `useQuery` hooks, data processing, chart data derivation
+
+### 6.1 StatCards Enhancement
+
+#### [MODIFY] [StatCards.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/dashboard/components/StatCards.tsx)
+- Add glassmorphism card style
+- Add trend indicators (up/down arrows with color)
+- Add subtle icon animations on hover
+- Enhance NumberTicker with color-coded values
+- Preserve: props interface, data flow
+
+### 6.2 ActivityChart Enhancement
+
+#### [MODIFY] [ActivityChart.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/dashboard/components/ActivityChart.tsx)
+- Add custom-styled tooltip with glassmorphism
+- Add animated gradient area fill
+- Add interactive hover crosshairs
+- Preserve: all Recharts data, theme integration
+
+### 6.3 RecentReviews Enhancement
+
+#### [MODIFY] [RecentReviews.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/dashboard/components/RecentReviews.tsx)
+- Add row hover animations with glow
+- Add status indicators with pulse animation
+- Add score badges with color coding
+- Preserve: router.push, data display, table structure
+
+---
+
+## Phase 7 — Projects Page
+
+#### [MODIFY] [projects/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/projects/page.tsx)
+- Add animated empty state with floating illustration
+- Add card hover effects with perspective tilt
+- Enhance create project dialog with better styling
+- Preserve: createMutation, queryClient, dialog state, form logic
+
+---
+
+## Phase 8 — Repositories Page
+
+#### [MODIFY] [repositories/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/repositories/page.tsx)
+- Add language indicator badges on repo cards
+- Add health/activity sparklines on cards
+- Enhance empty state
+- Preserve: all query hooks, ConnectRepoModal, navigation
+
+### 8.1 Repository Details Page
+
+#### [MODIFY] [repositories/[id]/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/repositories/[id]/page.tsx)
+- Add repo stats header with glassmorphism
+- Enhance tabs with animated indicator
+- Preserve: all data fetching, tab content components
+
+### 8.2 CommitsList Enhancement
+
+#### [MODIFY] [CommitsList.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/github/components/CommitsList.tsx)
+- Add timeline-style layout with connecting lines
+- Add animated review button with loading state
+- Add commit message truncation with expand
+- Preserve: reviewMutation, query hooks, token handling
+
+### 8.3 BranchesList Enhancement
+
+#### [MODIFY] [BranchesList.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/github/components/BranchesList.tsx)
+- Add hover effects and animated borders
+- Add default branch indicator
+- Preserve: query hooks, token handling
+
+### 8.4 PullRequestsList Enhancement
+
+#### [MODIFY] [PullRequestsList.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/github/components/PullRequestsList.tsx)
+- Add PR status badges with color
+- Add animated review button
+- Add PR diff stats indicators
+- Preserve: reviewMutation, query hooks
+
+---
+
+## Phase 9 — Review System
+
+### 9.1 Review Progress Toast Enhancement
+
+#### [MODIFY] [ReviewProgressToast.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/reviews/components/ReviewProgressToast.tsx)
+- Replace simple messages with structured timeline steps:
+  - ✓ Repository Connected
+  - ✓ Fetching Repository
+  - ⏳ AI Understanding Code
+  - ⏳ Security Analysis (etc.)
+- Add step-by-step animated checklist with checkmarks
+- Add progress percentage estimation
+- Add pulsing glow effect during analysis
+- Preserve: ALL Socket.IO event handlers (`review:start`, `review:progress`, `review:complete`, `review:error`), dismiss logic, router navigation
+
+### 9.2 Review History Page
+
+#### [MODIFY] [reviews/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/reviews/page.tsx)
+- Add animated filter bar with glassmorphism
+- Add review count badges on filter options
+- Enhance empty state
+- Preserve: all filtering logic, search, query hooks
+
+### 9.3 ReviewHistoryCard Enhancement
+
+#### [MODIFY] [ReviewHistoryCard.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/reviews/components/ReviewHistoryCard.tsx)
+- Add hover glow effect
+- Add animated score ring
+- Add color-coded grade badge with glow
+- Preserve: router.push, all data display
+
+### 9.4 Review Detail Page
+
+#### [MODIFY] [reviews/[id]/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/reviews/[id]/page.tsx)
+- Add animated page header with breadcrumbs
+- Add dedicated skeleton for loading state
+- Enhance in-progress state with animated terminal
+- Preserve: useQuery with refetchInterval, router, params
+
+### 9.5 ReviewSummaryCard Enhancement
+
+#### [MODIFY] [ReviewSummaryCard.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/reviews/components/ReviewSummaryCard.tsx)
+- Add animated circular score gauge
+- Add animated grade with glow
+- Add severity distribution mini-chart
+- Preserve: all data display, grade/score logic
+
+### 9.6 ReviewCommentsList Enhancement
+
+#### [MODIFY] [ReviewCommentsList.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/features/reviews/components/ReviewCommentsList.tsx)
+- Add animated filter badges
+- Add confidence indicator on each comment
+- Add copy-to-clipboard for code snippets with feedback
+- Enhance expand/collapse animation
+- Preserve: all filtering logic, expand state, syntax highlighting
+
+---
+
+## Phase 10 — Reports/Analytics Page
+
+#### [MODIFY] [reports/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/reports/page.tsx)
+- Add animated stat cards with gradient backgrounds
+- Add chart interaction animations
+- Add chart legend with interactive filtering
+- Add pie chart center label
+- Preserve: all useMemo calculations, Recharts config, theme integration
+
+---
+
+## Phase 11 — Settings Page
+
+#### [MODIFY] [settings/page.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/(dashboard)/settings/page.tsx)
+- Add animated tab transitions
+- Add theme preview cards (visual light/dark/system previews)
+- Add token masking with reveal toggle
+- Add API usage progress bar with animated fill
+- Preserve: PAT logic, localStorage, theme switching, query hooks
+
+---
+
+## Phase 12 — Error & 404 Pages
+
+#### [MODIFY] [not-found.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/not-found.tsx)
+- Add animated particle/star background
+- Add glitch text animation on "404"
+- Already uses Aurora — enhance with floating elements
+
+#### [MODIFY] [error.tsx](file:///d:/Coding%20languages/Coding%20Projects/Jetski/frontend/src/app/error.tsx)
+- Add animated error illustration
+- Add error code display
+- Preserve: error/reset props, console.error
+
+---
+
+## Phase 13 — Premium Features
+
+### 13.1 Floating AI Assistant
+
+#### [NEW] `src/components/ai-assistant/AIAssistant.tsx`
+- Floating button (bottom-right, above progress toast)
+- Opens a panel explaining contextual information:
+  - On Dashboard: explains metrics
+  - On Review: explains scores, severity levels, confidence
+  - On Repositories: explains review workflow
+- Uses only existing frontend data (no backend calls)
+- Dismissible, remembers collapsed state
+
+### 13.2 Keyboard Shortcuts
+
+#### [NEW] `src/components/keyboard-shortcuts/KeyboardShortcuts.tsx`
+- Global keyboard shortcut handler
+- `Ctrl+K` → Command Palette
+- `G D` → Dashboard, `G R` → Repositories, `G H` → Reviews, `G S` → Settings
+- `N R` → New Review (navigates to repos)
+- `?` → Show shortcuts modal
+- `Esc` → Close modals/palettes
+
+### 13.3 Onboarding Tour
+
+#### [NEW] `src/components/onboarding/OnboardingTour.tsx`
+- Multi-step tooltip tour
+- Highlights: Sidebar, Dashboard stats, Repositories, Review button
+- Skippable, remembers completion in localStorage
+- Triggered on first login (check localStorage flag)
+
+---
+
+## Phase 14 — Micro-Interactions & Polish
+
+### 14.1 Page Transitions
+
+#### [NEW] `src/components/transitions/PageTransition.tsx`
+- Framer Motion wrapper for route transitions
+- Fade + subtle slide animation
+- Used in dashboard layout to wrap `{children}`
+
+### 14.2 Enhanced Loading States
+
+- Replace all `<Loader2>` spinners with contextual skeletons throughout
+- Add shimmer effect to all skeleton components
+
+### 14.3 Copy Feedback
+
+- Add toast feedback on code snippet copy in ReviewCommentsList
+- Add click-to-copy on commit SHAs, review IDs
+
+### 14.4 Animated Icons
+
+- Add subtle rotation/bounce on hover for nav icons
+- Add pulse animation on active status indicators
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```bash
+npm run build
+```
+- Verify zero build errors
+- Verify no TypeScript errors
+- Verify all pages render correctly
+
+### Manual Verification
+1. **Auth Flow**: Login → Dashboard redirect works
+2. **Dashboard**: Stats load, charts render, recent reviews display
+3. **Repositories**: List, detail, commits, branches, PRs all render
+4. **Reviews**: Initiate review → Socket.IO progress toast → Report renders
+5. **Reports**: Charts animate, data displays correctly
+6. **Settings**: Theme toggle works, PAT save/clear works
+7. **Command Palette**: `Ctrl+K` opens, navigation works
+8. **Keyboard Shortcuts**: All shortcuts navigate correctly
+9. **Responsive**: Test at mobile, tablet, desktop breakpoints
+10. **Dark/Light Mode**: All pages look correct in both themes
+
+---
+
+## Execution Order
+
+| Phase | Priority | Pages/Components | Est. Effort |
+|-------|----------|------------------|-------------|
+| 1 | 🔴 Critical | Foundation (deps, CSS, shadcn components) | Small |
+| 2 | 🟡 Medium | Landing Page | Medium |
+| 3 | 🟡 Medium | Auth Pages (Login, Register, Forgot) | Medium |
+| 4 | 🔴 Critical | Dashboard Layout (Sidebar, Topbar, Layout) | Large |
+| 5 | 🟡 Medium | Command Palette | Medium |
+| 6 | 🔴 Critical | Dashboard Page + Widgets | Large |
+| 7 | 🟡 Medium | Projects Page | Medium |
+| 8 | 🟡 Medium | Repositories + Details + GitHub Components | Large |
+| 9 | 🔴 Critical | Review System (Progress, History, Report) | Very Large |
+| 10 | 🟡 Medium | Reports/Analytics | Medium |
+| 11 | 🟡 Medium | Settings | Medium |
+| 12 | 🟢 Low | Error/404 Pages | Small |
+| 13 | 🟡 Medium | Premium Features (AI Assistant, Shortcuts, Onboarding) | Large |
+| 14 | 🟢 Low | Micro-interactions & Polish | Medium |
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Font choice**: The app currently uses Geist Sans/Mono. Should I keep these or switch to Inter/Plus Jakarta Sans for a different feel? Geist is what Vercel uses and feels premium.
+
+> [!IMPORTANT]
+> **Color scheme**: The current purple-first (`#8b5cf6`) palette is already well-implemented. Should I keep it or shift to a different accent (blue-violet, cyan, or emerald)?
+
+> [!IMPORTANT]
+> **Landing page scope**: Currently `page.tsx` redirects to `/dashboard`. Do you want a full marketing landing page with features, pricing sections, etc., or a simpler hero + CTA that gets users to sign up quickly?
+
+> [!NOTE]
+> **Bundle size consideration**: `cmdk` is very lightweight (~3KB gzipped). All other libraries requested (Aceternity, Magic UI) are already partially installed. I'll add only the specific components needed, not entire libraries.

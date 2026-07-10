@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, TrendingUp, CheckCircle, XCircle, Code2 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useTheme } from 'next-themes';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { BorderBeam } from '@/components/magicui/border-beam';
@@ -28,7 +28,7 @@ export default function ReportsPage() {
     let completedReviews = 0;
     let failedReviews = 0;
     let totalScore = 0;
-    const scoresWithDates: { date: string, score: number }[] = [];
+    const dailyScores: Record<string, { total: number, count: number, timestamp: number }> = {};
     const reviewsPerRepo: Record<string, number> = {};
 
     projects.forEach(project => {
@@ -43,10 +43,15 @@ export default function ReportsPage() {
                 completedReviews++;
                 if (review.overallScore !== undefined) {
                   totalScore += review.overallScore;
-                  scoresWithDates.push({
-                    date: format(new Date(review.createdAt), 'MMM dd'),
-                    score: review.overallScore,
-                  });
+                  
+                  // Group by day for the trend chart
+                  const dateObj = new Date(review.createdAt);
+                  const dateKey = format(dateObj, 'yyyy-MM-dd');
+                  if (!dailyScores[dateKey]) {
+                    dailyScores[dateKey] = { total: 0, count: 0, timestamp: dateObj.getTime() };
+                  }
+                  dailyScores[dateKey].total += review.overallScore;
+                  dailyScores[dateKey].count += 1;
                 }
               } else if (review.status === 'FAILED') {
                 failedReviews++;
@@ -59,8 +64,13 @@ export default function ReportsPage() {
 
     const averageScore = completedReviews > 0 ? Math.round(totalScore / completedReviews) : 0;
     
-    // Sort line chart by date
-    scoresWithDates.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Sort line chart by timestamp and map to required format
+    const scoresWithDates = Object.values(dailyScores)
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .map(data => ({
+        date: format(new Date(data.timestamp), 'MMM dd'),
+        score: Math.round(data.total / data.count)
+      }));
 
     // Format for Pie Chart
     const statusData = [
@@ -88,17 +98,17 @@ export default function ReportsPage() {
     return (
       <div className="space-y-6 max-w-6xl mx-auto w-full pb-10">
         <div>
-          <Skeleton className="h-10 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
+          <Skeleton className="h-10 w-64 mb-2 shimmer rounded-xl" />
+          <Skeleton className="h-4 w-96 shimmer" />
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-32 rounded-xl" />
+            <Skeleton key={i} className="h-32 rounded-2xl shimmer" />
           ))}
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Skeleton className="col-span-1 lg:col-span-4 h-96 rounded-xl" />
-          <Skeleton className="col-span-1 lg:col-span-3 h-96 rounded-xl" />
+          <Skeleton className="col-span-1 lg:col-span-4 h-96 rounded-3xl shimmer" />
+          <Skeleton className="col-span-1 lg:col-span-3 h-96 rounded-3xl shimmer" />
         </div>
       </div>
     );
@@ -106,14 +116,14 @@ export default function ReportsPage() {
 
   if (error || !stats) {
     return (
-      <div className="p-6 text-center">
-        <h3 className="text-xl font-semibold text-red-500 mb-2">Error Loading Data</h3>
-        <p className="text-muted-foreground">We couldn't fetch the required data for your reports.</p>
+      <div className="flex flex-col items-center justify-center h-[50vh] text-center glass rounded-3xl max-w-lg mx-auto mt-10 p-10 border border-white/10">
+        <h3 className="text-2xl font-bold text-destructive">Error Loading Data</h3>
+        <p className="text-muted-foreground mt-2">We couldn't fetch the required data for your reports.</p>
       </div>
     );
   }
 
-  const COLORS = ['#22c55e', '#ef4444', '#3b82f6'];
+  const COLORS = ['#10b981', '#ef4444', '#8b5cf6'];
 
   return (
     <motion.div 
@@ -123,97 +133,104 @@ export default function ReportsPage() {
       className="space-y-6 max-w-6xl mx-auto w-full pb-10"
     >
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics & Reports</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-3xl font-black tracking-tighter text-foreground">Analytics & Reports</h1>
+        <p className="text-muted-foreground mt-1 text-sm font-medium">
           High-level statistics and insights across all your AI code reviews.
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <motion.div whileHover={{ y: -5 }} className="group relative h-full">
-          <Card className="h-full bg-background/50 backdrop-blur-md border-white/10 overflow-hidden relative shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
               <BorderBeam size={200} duration={8} delay={0} />
             </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
-              <Code2 className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Total Reviews</CardTitle>
+              <div className="bg-primary/10 p-2 rounded-lg border border-primary/20">
+                <Code2 className="h-4 w-4 text-primary" />
+              </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-3xl font-bold font-mono">
+              <div className="text-4xl font-black tracking-tighter text-foreground">
                 <NumberTicker value={stats.totalReviews} />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Across all connected repositories</p>
+              <p className="text-[11px] text-muted-foreground mt-2 font-medium">Across all connected repositories</p>
             </CardContent>
           </Card>
         </motion.div>
         
         <motion.div whileHover={{ y: -5 }} className="group relative h-full">
-          <Card className="h-full bg-background/50 backdrop-blur-md border-white/10 overflow-hidden relative shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
               <BorderBeam size={200} duration={8} delay={1} />
             </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium">Average Review Score</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Avg Score</CardTitle>
+              <div className="bg-chart-2/10 p-2 rounded-lg border border-chart-2/20">
+                <TrendingUp className="h-4 w-4 text-chart-2" />
+              </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-3xl font-bold font-mono flex items-baseline">
+              <div className="text-4xl font-black tracking-tighter text-foreground flex items-baseline">
                 <NumberTicker value={stats.averageScore} />
-                <span className="text-lg text-muted-foreground ml-1">/100</span>
+                <span className="text-lg text-muted-foreground ml-1 font-semibold">/100</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Higher is better</p>
+              <p className="text-[11px] text-muted-foreground mt-2 font-medium">Higher is better</p>
             </CardContent>
           </Card>
         </motion.div>
 
         <motion.div whileHover={{ y: -5 }} className="group relative h-full">
-          <Card className="h-full bg-background/50 backdrop-blur-md border-white/10 overflow-hidden relative shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
               <BorderBeam size={200} duration={8} delay={2} />
             </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium">Completed Reviews</CardTitle>
-              {stats.statusData.find(s => s.name === 'Failed') ? (
-                <XCircle className="h-4 w-4 text-red-500" />
-              ) : (
-                <CheckCircle className="h-4 w-4 text-green-500" />
-              )}
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Completed</CardTitle>
+              <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                {stats.statusData.find(s => s.name === 'Failed') ? (
+                  <XCircle className="h-4 w-4 text-destructive" />
+                ) : (
+                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                )}
+              </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-3xl font-bold font-mono">
+              <div className="text-4xl font-black tracking-tighter text-foreground">
                 <NumberTicker value={stats.statusData.find(s => s.name === 'Completed')?.value || 0} />
                 <span className="text-lg text-muted-foreground mx-1">/</span>
-                <span className="text-xl text-muted-foreground">{stats.totalReviews}</span>
+                <span className="text-2xl text-muted-foreground font-semibold">{stats.totalReviews}</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Successfully processed by AI</p>
+              <p className="text-[11px] text-muted-foreground mt-2 font-medium">Successfully processed by AI</p>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-1 lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Score Trends</CardTitle>
-            <CardDescription>Average review scores over recent reviews.</CardDescription>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-1 lg:col-span-4 glass border-white/10 shadow-xl overflow-hidden rounded-3xl">
+          <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
+            <CardTitle className="text-lg font-bold">Score Trends</CardTitle>
+            <CardDescription className="text-xs font-medium">Average review scores over recent reviews.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="h-[300px]">
               {stats.scoresWithDates.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={stats.scoresWithDates} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
+                    <XAxis dataKey="date" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                    <YAxis stroke="#888888" fontSize={11} tickLine={false} axisLine={false} domain={[0, 100]} dx={-10} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff', borderRadius: '8px' }}
+                      contentStyle={{ backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}
+                      itemStyle={{ fontWeight: 'bold' }}
                     />
-                    <Line type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="score" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4, fill: "var(--primary)", strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0, fill: "var(--chart-2)" }} />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-md">
+                <div className="flex h-full items-center justify-center text-muted-foreground text-sm border border-white/5 rounded-xl bg-black/10">
                   Not enough data for trend analysis.
                 </div>
               )}
@@ -221,12 +238,12 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1 lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Review Status Distribution</CardTitle>
-            <CardDescription>Pass vs fail rates for all reviews.</CardDescription>
+        <Card className="col-span-1 lg:col-span-3 glass border-white/10 shadow-xl overflow-hidden rounded-3xl">
+          <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
+            <CardTitle className="text-lg font-bold">Review Status</CardTitle>
+            <CardDescription className="text-xs font-medium">Pass vs fail rates for all reviews.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="h-[300px]">
               {stats.totalReviews > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -235,22 +252,24 @@ export default function ReportsPage() {
                       data={stats.statusData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
+                      innerRadius={70}
+                      outerRadius={90}
                       paddingAngle={5}
                       dataKey="value"
+                      stroke="none"
                     >
                       {stats.statusData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff', borderRadius: '8px' }}
+                      contentStyle={{ backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}
+                      itemStyle={{ fontWeight: 'bold', color: '#fff' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-md">
+                <div className="flex h-full items-center justify-center text-muted-foreground text-sm border border-white/5 rounded-xl bg-black/10">
                   No review data available.
                 </div>
               )}
@@ -259,27 +278,27 @@ export default function ReportsPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Repositories by Review Volume</CardTitle>
+      <Card className="glass border-white/10 shadow-xl overflow-hidden rounded-3xl">
+        <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
+          <CardTitle className="text-lg font-bold">Top Repositories by Review Volume</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="h-[300px]">
             {stats.repoData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.repoData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.2} />
-                  <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={150} />
+                <BarChart data={stats.repoData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
+                  <XAxis type="number" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} dy={5} />
+                  <YAxis dataKey="name" type="category" stroke="#888888" fontSize={11} tickLine={false} axisLine={false} width={150} dx={-10} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff', borderRadius: '8px' }}
-                    cursor={{ fill: theme === 'dark' ? '#374151' : '#f3f4f6' }}
+                    contentStyle={{ backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}
+                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                   />
-                  <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={32} />
+                  <Bar dataKey="count" fill="var(--primary)" radius={[0, 6, 6, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center text-muted-foreground text-sm border-2 border-dashed rounded-md">
+              <div className="flex h-full items-center justify-center text-muted-foreground text-sm border border-white/5 rounded-xl bg-black/10">
                 No repositories reviewed yet.
               </div>
             )}

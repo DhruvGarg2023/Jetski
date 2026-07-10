@@ -7,6 +7,8 @@ import { AuthProvider } from "./auth-provider";
 import { SocketProvider } from "./socket-provider";
 import { Toaster } from "sonner";
 import { ReviewProgressToast } from "@/features/reviews/components/ReviewProgressToast";
+import { CommandPalette } from "@/components/command-palette/CommandPalette";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts/KeyboardShortcuts";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -25,7 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               position="top-right"
               toastOptions={{
                 classNames: {
-                  toast: "bg-background border-border border shadow-2xl rounded-xl font-sans",
+                  toast: "glass border shadow-2xl rounded-xl font-sans",
                   description: "text-muted-foreground",
                   actionButton: "bg-primary text-primary-foreground font-medium",
                   cancelButton: "bg-muted text-muted-foreground",
@@ -33,10 +35,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
               }}
             />
             <ReviewProgressToast />
+            <CommandPalette />
+            <KeyboardShortcuts />
           </SocketProvider>
         </AuthProvider>
       </QueryProvider>
     </ThemeProvider>
   );
 }
-
