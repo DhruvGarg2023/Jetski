@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, XCircle, GitCommit, GitPullRequest, ChevronRight } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 interface ReviewHistoryCardProps {
   review: {
@@ -54,11 +55,19 @@ export function ReviewHistoryCard({ review }: ReviewHistoryCardProps) {
 
   return (
     <Card 
-      className="overflow-hidden glass-subtle border-white/5 transition-all duration-300 cursor-pointer group card-hover relative"
+      className="overflow-hidden glass-subtle border-white/5 transition-all duration-300 cursor-pointer group card-hover relative group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10"
       onClick={() => router.push(`/reviews/${review.id}`)}
     >
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
+        <BorderBeam size={300} duration={12} delay={0} />
+      </div>
+      
+      {/* Glowing orbs on hover */}
+      <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+      <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/10 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+
       <div 
-        className="absolute left-0 top-0 bottom-0 w-1 transition-colors duration-300"
+        className="absolute left-0 top-0 bottom-0 w-1 transition-colors duration-300 z-10"
         style={{ 
           backgroundColor: review.status === 'COMPLETED' ? 'hsl(var(--emerald-500) / 0.5)' : review.status === 'FAILED' ? 'hsl(var(--destructive) / 0.5)' : 'hsl(var(--chart-2) / 0.5)' 
         }} 
@@ -72,7 +81,7 @@ export function ReviewHistoryCard({ review }: ReviewHistoryCardProps) {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1.5">
-                <h3 className="font-bold text-lg text-foreground leading-none">{review.repoName}</h3>
+                <h3 className="font-bold text-lg text-foreground leading-none group-hover:text-primary transition-colors duration-300">{review.repoName}</h3>
                 <Badge variant="outline" className={`text-[10px] uppercase tracking-widest px-2 py-0 h-5 ${getStatusColor(review.status)}`}>
                   {review.status}
                 </Badge>

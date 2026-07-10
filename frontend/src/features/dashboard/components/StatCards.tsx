@@ -53,16 +53,20 @@ export function StatCards({ totalProjects, totalRepos, totalReviews }: StatCards
           transition={{ duration: 0.3, delay: index * 0.1 }}
           className="group relative"
         >
-          <Card className="relative overflow-hidden h-full glass-subtle border-white/5 transition-all duration-300 card-hover">
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+          <Card className="relative overflow-hidden h-full glass-subtle border-white/5 transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
               <BorderBeam size={250} duration={12} delay={index * 2} />
             </div>
             
+            {/* Glowing orbs on hover */}
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-primary transition-colors duration-300">
                 {stat.title}
               </CardTitle>
-              <div className="rounded-xl bg-primary/10 p-2 text-primary shadow-inner">
+              <div className="rounded-xl bg-primary/10 p-2 text-primary shadow-inner group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
                 <stat.icon className="h-4 w-4 transition-transform group-hover:scale-110 duration-300" />
               </div>
             </CardHeader>

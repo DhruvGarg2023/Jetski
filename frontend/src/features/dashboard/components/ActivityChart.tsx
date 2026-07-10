@@ -27,12 +27,17 @@ export function ActivityChart({ data }: ActivityChartProps) {
       transition={{ duration: 0.4, delay: 0.2 }}
       className="col-span-1 lg:col-span-4"
     >
-      <Card className="h-full relative overflow-hidden group glass-subtle border-white/5 transition-colors card-hover">
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+      <Card className="h-full relative overflow-hidden group glass-subtle border-white/5 transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
           <BorderBeam size={400} duration={15} delay={1} />
         </div>
+        
+        {/* Glowing orbs on hover */}
+        <div className="absolute -right-20 -top-20 w-48 h-48 bg-primary/10 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+        <div className="absolute -left-20 -bottom-20 w-48 h-48 bg-chart-2/10 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+        
         <CardHeader className="relative z-10 pb-0">
-          <CardTitle className="text-lg font-bold">Review Activity</CardTitle>
+          <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors duration-300">Review Activity</CardTitle>
           <CardDescription>
             Code reviews conducted over the last 30 days
           </CardDescription>

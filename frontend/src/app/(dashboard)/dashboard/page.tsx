@@ -101,6 +101,11 @@ export default function DashboardPage() {
   }
 
   const firstName = user?.name?.split(" ")[0] || "Developer";
+  
+  // Determine if the user is new (account created within the last 24 hours)
+  const isNewUser = user?.createdAt 
+    ? (new Date().getTime() - new Date(user.createdAt).getTime()) < 24 * 60 * 60 * 1000 
+    : false;
 
   return (
     <motion.div 
@@ -121,7 +126,7 @@ export default function DashboardPage() {
             Workspace Ready
           </motion.div>
           <h2 className="text-3xl font-black tracking-tighter">
-            Welcome back, <span className="gradient-text">{firstName}</span>
+            {isNewUser ? "Welcome," : "Welcome back,"} <span className="gradient-text">{firstName}</span>
           </h2>
           <p className="text-muted-foreground mt-1">Here is what is happening with your code today.</p>
         </div>

@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectsService } from "@/features/projects/projects.service";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Folder, Loader2, Plus, GitBranch } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Folder, Loader2, Plus, GitBranch, Activity, ArrowRight, Code2 } from "lucide-react";
+import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -196,39 +197,50 @@ export default function ProjectsPage() {
               whileHover={{ y: -5 }}
               className="group relative"
             >
-              <Card className="flex flex-col h-full bg-background/50 backdrop-blur-sm border-white/10 overflow-hidden shadow-sm transition-all hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)]">
+              <Card className="flex flex-col h-full glass-subtle border-white/5 overflow-hidden transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
                   <BorderBeam size={300} duration={10} delay={index} />
                 </div>
-                <CardHeader className="relative z-10">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <div className="rounded-full bg-primary/10 p-2 text-primary">
-                      <Folder className="h-4 w-4" />
+                
+                {/* Decorative glowing orbs on hover */}
+                <div className="absolute -right-20 -top-20 w-40 h-40 bg-primary/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+                <div className="absolute -left-20 -bottom-20 w-40 h-40 bg-chart-2/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+                
+                <CardHeader className="relative z-10 pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                    <div className="rounded-xl bg-primary/10 p-2.5 text-primary shadow-inner group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                      <Folder className="h-5 w-5" />
                     </div>
-                    {project.name}
+                    <span className="truncate">{project.name}</span>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="pt-2">
                     Created {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 relative z-10">
-                  <div className="text-sm text-muted-foreground flex items-center gap-2">
-                    <div className="flex -space-x-2">
-                      {/* Decorative dots to represent repos */}
-                      {[...Array(Math.min(project.repositories?.length || 0, 3))].map((_, i) => (
-                        <div key={i} className="h-6 w-6 rounded-full border-2 border-background bg-secondary flex items-center justify-center">
-                          <GitBranch className="h-3 w-3 text-secondary-foreground" />
-                        </div>
-                      ))}
-                      {(project.repositories?.length || 0) > 3 && (
-                        <div className="h-6 w-6 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-medium">
-                          +{(project.repositories?.length || 0) - 3}
-                        </div>
-                      )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col justify-center items-start gap-1 text-sm text-muted-foreground p-3 rounded-lg bg-black/20 border border-white/5 group-hover:border-primary/20 transition-colors duration-300">
+                      <div className="flex items-center gap-2 text-foreground font-semibold">
+                        <GitBranch className="h-4 w-4 text-primary" />
+                        <span>{project.repositories?.length || 0}</span>
+                      </div>
+                      <span className="text-[11px] uppercase tracking-wider">Repositories</span>
                     </div>
-                    <span className="ml-2">{project.repositories?.length || 0} Connected {project.repositories?.length === 1 ? 'Repository' : 'Repositories'}</span>
+                    <div className="flex flex-col justify-center items-start gap-1 text-sm text-muted-foreground p-3 rounded-lg bg-black/20 border border-white/5 group-hover:border-primary/20 transition-colors duration-300">
+                      <div className="flex items-center gap-2 text-foreground font-semibold">
+                        <Activity className="h-4 w-4 text-chart-2" />
+                        <span>{project.repositories?.reduce((sum, repo) => sum + ((repo as any).reviews?.length || 0), 0) || 0}</span>
+                      </div>
+                      <span className="text-[11px] uppercase tracking-wider">Total Reviews</span>
+                    </div>
                   </div>
                 </CardContent>
+                <CardFooter className="pt-4 border-t border-white/5 relative z-10 mt-auto bg-black/10">
+                  <Link href="/repositories" className={buttonVariants({ variant: "default", className: "w-full shadow-lg shadow-primary/20 group-hover:bg-primary group-hover:text-primary-foreground hover-glow transition-all duration-300" })}>
+                    Manage Project
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </CardFooter>
               </Card>
             </motion.div>
           ))}

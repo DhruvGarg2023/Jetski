@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { projectsService } from '@/features/projects/projects.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, TrendingUp, CheckCircle, XCircle, Code2 } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, Label, Legend } from 'recharts';
 import { useTheme } from 'next-themes';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -141,14 +141,19 @@ export default function ReportsPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <motion.div whileHover={{ y: -5 }} className="group relative h-full">
-          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
               <BorderBeam size={200} duration={8} delay={0} />
             </div>
+            
+            {/* Glowing orbs on hover */}
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Total Reviews</CardTitle>
-              <div className="bg-primary/10 p-2 rounded-lg border border-primary/20">
-                <Code2 className="h-4 w-4 text-primary" />
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold group-hover:text-primary transition-colors duration-300">Total Reviews</CardTitle>
+              <div className="bg-primary/10 p-2 rounded-lg border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                <Code2 className="h-4 w-4 text-primary group-hover:text-primary-foreground transition-colors" />
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
@@ -161,14 +166,19 @@ export default function ReportsPage() {
         </motion.div>
         
         <motion.div whileHover={{ y: -5 }} className="group relative h-full">
-          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
               <BorderBeam size={200} duration={8} delay={1} />
             </div>
+            
+            {/* Glowing orbs on hover */}
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Avg Score</CardTitle>
-              <div className="bg-chart-2/10 p-2 rounded-lg border border-chart-2/20">
-                <TrendingUp className="h-4 w-4 text-chart-2" />
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold group-hover:text-primary transition-colors duration-300">Avg Score</CardTitle>
+              <div className="bg-chart-2/10 p-2 rounded-lg border border-chart-2/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                <TrendingUp className="h-4 w-4 text-chart-2 group-hover:text-primary-foreground transition-colors" />
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
@@ -182,17 +192,22 @@ export default function ReportsPage() {
         </motion.div>
 
         <motion.div whileHover={{ y: -5 }} className="group relative h-full">
-          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+          <Card className="h-full glass-subtle border-white/5 overflow-hidden relative transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
               <BorderBeam size={200} duration={8} delay={2} />
             </div>
+            
+            {/* Glowing orbs on hover */}
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+            
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Completed</CardTitle>
-              <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+              <CardTitle className="text-xs uppercase tracking-widest text-muted-foreground font-semibold group-hover:text-primary transition-colors duration-300">Completed</CardTitle>
+              <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
                 {stats.statusData.find(s => s.name === 'Failed') ? (
-                  <XCircle className="h-4 w-4 text-destructive" />
+                  <XCircle className="h-4 w-4 text-destructive group-hover:text-primary-foreground transition-colors" />
                 ) : (
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                  <CheckCircle className="h-4 w-4 text-emerald-500 group-hover:text-primary-foreground transition-colors" />
                 )}
               </div>
             </CardHeader>
@@ -209,9 +224,17 @@ export default function ReportsPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-1 lg:col-span-4 glass border-white/10 shadow-xl overflow-hidden rounded-3xl">
-          <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
-            <CardTitle className="text-lg font-bold">Score Trends</CardTitle>
+        <Card className="col-span-1 lg:col-span-4 glass-subtle relative overflow-hidden group border-white/5 transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10 rounded-3xl">
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
+            <BorderBeam size={400} duration={15} delay={1} />
+          </div>
+          
+          {/* Glowing orbs on hover */}
+          <div className="absolute -right-20 -top-20 w-48 h-48 bg-primary/10 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+          <div className="absolute -left-20 -bottom-20 w-48 h-48 bg-chart-2/10 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+          
+          <CardHeader className="pb-0 relative z-10">
+            <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors duration-300">Score Trends</CardTitle>
             <CardDescription className="text-xs font-medium">Average review scores over recent reviews.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
@@ -238,9 +261,17 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1 lg:col-span-3 glass border-white/10 shadow-xl overflow-hidden rounded-3xl">
-          <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
-            <CardTitle className="text-lg font-bold">Review Status</CardTitle>
+        <Card className="col-span-1 lg:col-span-3 glass-subtle relative overflow-hidden group border-white/5 transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10 rounded-3xl">
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
+            <BorderBeam size={400} duration={15} delay={2} />
+          </div>
+          
+          {/* Glowing orbs on hover */}
+          <div className="absolute -right-20 -top-20 w-48 h-48 bg-primary/10 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+          <div className="absolute -left-20 -bottom-20 w-48 h-48 bg-chart-2/10 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+          
+          <CardHeader className="pb-0 relative z-10">
+            <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors duration-300">Review Status</CardTitle>
             <CardDescription className="text-xs font-medium">Pass vs fail rates for all reviews.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
@@ -258,6 +289,18 @@ export default function ReportsPage() {
                       dataKey="value"
                       stroke="none"
                     >
+                      <Label 
+                        value={`${Math.round((stats.statusData.find(d => d.name === 'Completed')?.value || 0) / (stats.totalReviews || 1) * 100)}%`} 
+                        position="center"
+                        dy={-8}
+                        className="fill-foreground font-black text-3xl"
+                      />
+                      <Label
+                        value="Pass Rate"
+                        position="center"
+                        dy={16}
+                        className="fill-muted-foreground font-medium text-xs"
+                      />
                       {stats.statusData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
@@ -266,6 +309,7 @@ export default function ReportsPage() {
                       contentStyle={{ backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}
                       itemStyle={{ fontWeight: 'bold', color: '#fff' }}
                     />
+                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -278,9 +322,17 @@ export default function ReportsPage() {
         </Card>
       </div>
 
-      <Card className="glass border-white/10 shadow-xl overflow-hidden rounded-3xl">
-        <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
-          <CardTitle className="text-lg font-bold">Top Repositories by Review Volume</CardTitle>
+      <Card className="glass-subtle relative overflow-hidden group border-white/5 transition-all duration-300 card-hover group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10 rounded-3xl">
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
+          <BorderBeam size={600} duration={20} delay={3} />
+        </div>
+        
+        {/* Glowing orbs on hover */}
+        <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/10 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+        <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-chart-2/10 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+        
+        <CardHeader className="pb-0 relative z-10">
+          <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors duration-300">Top Repositories by Review Volume</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="h-[300px]">

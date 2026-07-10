@@ -1,35 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, X, MessageSquare, Send } from "lucide-react";
+import { Sparkles, X, Info } from "lucide-react";
 import { Button } from "./button";
-import { Input } from "./input";
 import { BorderBeam } from "@/components/magicui/border-beam";
 
 export function FloatingAssistant() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [messages, setMessages] = useState<{role: 'user' | 'ai', content: string}[]>([
-    { role: 'ai', content: "Hi! I'm your Jetski AI assistant. How can I help you with your code reviews today?" }
-  ]);
+  const [contextMessage, setContextMessage] = useState("");
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  // Load saved state
+  useEffect(() => {
+    const savedState = localStorage.getItem('jetski_ai_assistant_open');
+    if (savedState === 'true') setIsOpen(true);
+  }, []);
 
-    // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: query }]);
-    setQuery("");
-
-    // Simulate AI response
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'ai', 
-        content: "I'm currently in demo mode, but soon I'll be able to help you analyze your code, explain review feedback, and suggest improvements directly from this chat!" 
-      }]);
-    }, 1000);
+  const toggleOpen = () => {
+    setIsOpen(prev => {
+      const next = !prev;
+      localStorage.setItem('jetski_ai_assistant_open', next.toString());
+      return next;
+    });
   };
+
+  // Contextual messages based on pathname
+  useEffect(() => {
+    let contextMessage = "Hi! I'm your Jetski AI assistant. How can I help you with your code reviews today?";
+    
+    if (pathname === '/dashboard') {
+      contextMessage = "Welcome to your Dashboard! Here you can track your total projects, connected repositories, and review metrics. The Activity chart shows your recent code reviews.";
+    } else if (pathname?.startsWith('/reviews/') && pathname !== '/reviews') {
+      contextMessage = "This is a detailed Review Report. The overall grade is calculated from code quality, security, and performance metrics. You can filter the comments below by severity.";
+    } else if (pathname === '/reviews') {
+      contextMessage = "This is your Review History. You can see all past AI code reviews and filter them by grade or status.";
+    } else if (pathname?.startsWith('/repositories')) {
+      contextMessage = "On the Repositories page, you can connect new GitHub repos and see your branches and pull requests. Click 'Review Now' to start a real-time AI code analysis.";
+    } else if (pathname === '/reports') {
+      contextMessage = "The Reports page visualizes your code quality trends. Pay attention to the most common issue severities to improve your team's overall score.";
+    } else if (pathname === '/settings') {
+      contextMessage = "Manage your preferences and API token here. Remember, your GitHub token requires the 'repo' scope and is stored securely in your local browser.";
+    }
+
+    setContextMessage(contextMessage);
+  }, [pathname]);
 
   return (
     <>
@@ -41,7 +57,6 @@ export function FloatingAssistant() {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 glass border-white/10 rounded-2xl shadow-2xl shadow-primary/20 overflow-hidden flex flex-col"
-            style={{ height: "500px", maxHeight: "calc(100vh - 120px)" }}
           >
             <BorderBeam size={200} duration={10} delay={0} />
             
@@ -53,60 +68,31 @@ export function FloatingAssistant() {
                 </div>
                 <div>
                   <h3 className="font-bold text-foreground leading-none tracking-tight">Jetski AI</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-1">Copilot</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-1">Page Guide</p>
                 </div>
               </div>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 className="h-8 w-8 rounded-full hover:bg-white/10" 
-                onClick={() => setIsOpen(false)}
+                onClick={toggleOpen}
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
 
-            {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10 bg-background/20 backdrop-blur-sm">
-              {messages.map((msg, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed ${
-                      msg.role === 'user' 
-                        ? 'bg-primary/20 text-foreground border border-primary/30 rounded-br-sm' 
-                        : 'bg-black/30 text-gray-300 border border-white/5 rounded-bl-sm'
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Input Area */}
-            <div className="p-4 bg-black/40 border-t border-white/5 relative z-10">
-              <form onSubmit={handleSend} className="relative">
-                <Input 
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Ask me anything..." 
-                  className="pr-10 bg-background/50 border-white/10 h-11 rounded-xl focus:border-primary/50"
-                />
-                <Button 
-                  type="submit" 
-                  size="icon" 
-                  variant="ghost" 
-                  className="absolute right-1 top-1.5 h-8 w-8 text-primary hover:bg-primary/20 hover:text-primary rounded-lg"
-                  disabled={!query.trim()}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
+            {/* Content Area */}
+            <div className="p-6 relative z-10 bg-background/20 backdrop-blur-sm">
+              <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-sm leading-relaxed text-foreground shadow-inner">
+                {contextMessage}
+              </div>
+              
+              <Button 
+                onClick={toggleOpen}
+                className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 h-11 rounded-xl"
+              >
+                Got it
+              </Button>
             </div>
           </motion.div>
         )}
@@ -119,14 +105,14 @@ export function FloatingAssistant() {
         whileTap={{ scale: 0.95 }}
       >
         <Button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           className={`h-14 w-14 rounded-full shadow-2xl transition-all duration-300 ${
             isOpen 
               ? 'bg-secondary text-secondary-foreground hover:bg-secondary border border-white/10' 
               : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/30 border border-primary/20'
           }`}
         >
-          {isOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
+          {isOpen ? <X className="h-6 w-6" /> : <Info className="h-6 w-6" />}
         </Button>
       </motion.div>
     </>

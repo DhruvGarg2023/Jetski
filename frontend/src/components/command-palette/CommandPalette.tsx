@@ -65,7 +65,10 @@ export function CommandPalette() {
           >
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
-            <kbd className="ml-auto text-[10px] text-muted-foreground font-mono">G D</kbd>
+            <div className="ml-auto flex items-center gap-1">
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">G</kbd>
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">D</kbd>
+            </div>
           </CommandItem>
           <CommandItem
             onSelect={() => runCommand(() => router.push("/projects"))}
@@ -78,14 +81,20 @@ export function CommandPalette() {
           >
             <GitBranch className="mr-2 h-4 w-4" />
             <span>Repositories</span>
-            <kbd className="ml-auto text-[10px] text-muted-foreground font-mono">G R</kbd>
+            <div className="ml-auto flex items-center gap-1">
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">G</kbd>
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">R</kbd>
+            </div>
           </CommandItem>
           <CommandItem
             onSelect={() => runCommand(() => router.push("/reviews"))}
           >
             <Code className="mr-2 h-4 w-4" />
             <span>Review History</span>
-            <kbd className="ml-auto text-[10px] text-muted-foreground font-mono">G H</kbd>
+            <div className="ml-auto flex items-center gap-1">
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">G</kbd>
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">H</kbd>
+            </div>
           </CommandItem>
           <CommandItem
             onSelect={() => runCommand(() => router.push("/reports"))}
@@ -98,7 +107,10 @@ export function CommandPalette() {
           >
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
-            <kbd className="ml-auto text-[10px] text-muted-foreground font-mono">G S</kbd>
+            <div className="ml-auto flex items-center gap-1">
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">G</kbd>
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">S</kbd>
+            </div>
           </CommandItem>
         </CommandGroup>
 
@@ -110,7 +122,10 @@ export function CommandPalette() {
           >
             <Plus className="mr-2 h-4 w-4" />
             <span>New Review</span>
-            <kbd className="ml-auto text-[10px] text-muted-foreground font-mono">N R</kbd>
+            <div className="ml-auto flex items-center gap-1">
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">N</kbd>
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded border border-white/10 bg-muted/30 text-[10px] font-mono font-medium text-muted-foreground shadow-sm">R</kbd>
+            </div>
           </CommandItem>
         </CommandGroup>
 

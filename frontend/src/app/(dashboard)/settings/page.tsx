@@ -108,14 +108,19 @@ export default function SettingsPage() {
 
         <TabsContent value="profile" className="mt-6 focus-visible:outline-none">
           <motion.div whileHover={{ y: -5 }} className="group relative">
-            <Card className="glass-subtle border-white/5 overflow-hidden shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
+            <Card className="glass-subtle border-white/5 overflow-hidden transition-all duration-300 card-hover relative group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
                 <BorderBeam size={300} duration={10} delay={0} />
               </div>
-              <CardHeader className="relative z-10 border-b border-white/5 bg-black/20 pb-5">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20">
-                    <User className="h-5 w-5 text-primary" />
+              
+              {/* Glowing orbs on hover */}
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              
+              <CardHeader className="relative z-10 pb-0">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                    <User className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
                   </div>
                   User Profile
                 </CardTitle>
@@ -151,14 +156,19 @@ export default function SettingsPage() {
 
         <TabsContent value="preferences" className="mt-6 focus-visible:outline-none">
           <motion.div whileHover={{ y: -5 }} className="group relative">
-            <Card className="glass-subtle border-white/5 overflow-hidden shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
+            <Card className="glass-subtle border-white/5 overflow-hidden transition-all duration-300 card-hover relative group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
                 <BorderBeam size={300} duration={10} delay={0} />
               </div>
-              <CardHeader className="relative z-10 border-b border-white/5 bg-black/20 pb-5">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20">
-                    <Monitor className="h-5 w-5 text-primary" />
+              
+              {/* Glowing orbs on hover */}
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              
+              <CardHeader className="relative z-10 pb-0">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                    <Monitor className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
                   </div>
                   Appearance
                 </CardTitle>
@@ -205,14 +215,19 @@ export default function SettingsPage() {
 
         <TabsContent value="api-usage" className="mt-6 focus-visible:outline-none">
           <motion.div whileHover={{ y: -5 }} className="group relative">
-            <Card className="glass-subtle border-white/5 overflow-hidden shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
+            <Card className="glass-subtle border-white/5 overflow-hidden transition-all duration-300 card-hover relative group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
                 <BorderBeam size={300} duration={10} delay={0} />
               </div>
-              <CardHeader className="relative z-10 border-b border-white/5 bg-black/20 pb-5">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20">
-                    <Activity className="h-5 w-5 text-primary" />
+              
+              {/* Glowing orbs on hover */}
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              
+              <CardHeader className="relative z-10 pb-0">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                    <Activity className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
                   </div>
                   API & Token Usage
                 </CardTitle>
@@ -273,14 +288,19 @@ export default function SettingsPage() {
 
         <TabsContent value="github" className="mt-6 focus-visible:outline-none">
           <motion.div whileHover={{ y: -5 }} className="group relative">
-            <Card className="glass-subtle border-white/5 overflow-hidden shadow-lg transition-all duration-300 hover:shadow-primary/20 hover:border-white/10">
+            <Card className="glass-subtle border-white/5 overflow-hidden transition-all duration-300 card-hover relative group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0">
                 <BorderBeam size={300} duration={10} delay={0} />
               </div>
-              <CardHeader className="relative z-10 border-b border-white/5 bg-black/20 pb-5">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20">
-                    <Key className="h-5 w-5 text-primary" />
+              
+              {/* Glowing orbs on hover */}
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-chart-2/20 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-0" />
+              
+              <CardHeader className="relative z-10 pb-0">
+                <CardTitle className="flex items-center gap-2 text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                  <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                    <Key className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
                   </div>
                   GitHub Personal Access Token
                 </CardTitle>

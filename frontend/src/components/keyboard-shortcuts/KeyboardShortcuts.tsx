@@ -108,31 +108,37 @@ export function KeyboardShortcuts() {
 
   return (
     <Dialog open={showHelp} onOpenChange={setShowHelp}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            ⌨️ Keyboard Shortcuts
-          </DialogTitle>
-          <DialogDescription>
-            Navigate faster with keyboard shortcuts.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-2 py-4">
+      <DialogContent className="sm:max-w-md glass border-white/10 shadow-2xl rounded-2xl overflow-hidden p-0">
+        <div className="p-6 pb-2 border-b border-white/5 bg-background/20">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-xl font-bold">
+              <div className="bg-primary/10 p-2 rounded-xl border border-primary/20 shadow-inner">
+                <span className="text-lg leading-none">⌨️</span>
+              </div>
+              Keyboard Shortcuts
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground pt-2 font-medium">
+              Navigate faster with keyboard shortcuts.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+        
+        <div className="grid gap-1 p-4 bg-black/10">
           {shortcuts.map((shortcut) => (
             <div
               key={shortcut.description}
-              className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
+              className="flex items-center justify-between py-3 px-4 rounded-xl group hover:bg-primary/5 border border-transparent hover:border-primary/20 transition-all duration-300 cursor-default"
             >
-              <span className="text-sm">{shortcut.description}</span>
-              <div className="flex items-center gap-1">
+              <span className="text-sm font-semibold text-muted-foreground group-hover:text-primary transition-colors">{shortcut.description}</span>
+              <div className="flex items-center gap-1.5">
                 {shortcut.keys.map((key, i) => (
-                  <span key={i}>
+                  <span key={i} className="flex items-center gap-1.5">
                     {i > 0 && (
-                      <span className="text-muted-foreground mx-0.5 text-xs">
+                      <span className="text-muted-foreground/40 text-xs font-black">
                         +
                       </span>
                     )}
-                    <kbd className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded border border-border bg-muted text-[11px] font-mono font-medium text-muted-foreground">
+                    <kbd className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg border border-white/10 bg-background/50 text-xs font-mono font-bold text-foreground shadow-sm group-hover:border-primary/30 group-hover:text-primary group-hover:bg-primary/10 transition-all duration-300 shadow-black/20 group-hover:shadow-primary/10">
                       {key}
                     </kbd>
                   </span>
