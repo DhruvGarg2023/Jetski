@@ -6,8 +6,12 @@ import { Sidebar } from "@/features/dashboard/components/Sidebar";
 import { Topbar } from "@/features/dashboard/components/Topbar";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { FloatingAssistant } from "@/components/ui/floating-assistant";
+import dynamic from "next/dynamic";
 
+const FloatingAssistant = dynamic(
+  () => import("@/components/ui/floating-assistant").then((mod) => mod.FloatingAssistant),
+  { ssr: false }
+);
 export default function DashboardLayout({
   children,
 }: {

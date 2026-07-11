@@ -2,9 +2,29 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/features/projects/projects.service";
-import { StatCards } from "@/features/dashboard/components/StatCards";
-import { ActivityChart } from "@/features/dashboard/components/ActivityChart";
-import { RecentReviews } from "@/features/dashboard/components/RecentReviews";
+import dynamic from "next/dynamic";
+
+const StatCards = dynamic(
+  () => import("@/features/dashboard/components/StatCards").then((mod) => mod.StatCards),
+  { loading: () => (
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3 mb-8 w-full">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-[140px] rounded-2xl bg-muted/50 animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+);
+
+const ActivityChart = dynamic(
+  () => import("@/features/dashboard/components/ActivityChart").then((mod) => mod.ActivityChart),
+  { ssr: false, loading: () => <div className="h-[400px] col-span-4 rounded-2xl bg-muted/50 animate-pulse" /> }
+);
+
+const RecentReviews = dynamic(
+  () => import("@/features/dashboard/components/RecentReviews").then((mod) => mod.RecentReviews),
+  { ssr: false, loading: () => <div className="h-[400px] col-span-3 rounded-2xl bg-muted/50 animate-pulse" /> }
+);
 import { Skeleton } from "@/components/ui/skeleton";
 import { Project, Review } from "@/features/projects/types";
 import { format } from "date-fns";

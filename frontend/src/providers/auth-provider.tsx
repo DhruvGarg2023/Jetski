@@ -33,9 +33,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.error('Failed to restore session:', error);
           localStorage.removeItem('token');
           // If we are on a protected route, redirect to login
-          if (!pathname.startsWith('/login') && !pathname.startsWith('/register')) {
+          if (!pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password') && pathname !== '/') {
             router.push('/login');
           }
+        }
+      } else {
+        // No token present
+        if (!pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password') && pathname !== '/') {
+          router.push('/login');
         }
       }
       setIsLoading(false);

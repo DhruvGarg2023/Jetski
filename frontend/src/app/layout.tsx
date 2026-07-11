@@ -14,10 +14,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Real-Time AI Code Reviewer",
-  description: "Modern, production-grade AI code reviewer platform",
+  title: {
+    template: "%s | Jetski",
+    default: "Jetski - Real-Time AI Code Reviewer",
+  },
+  description: "Modern, production-grade AI code reviewer platform to streamline your development workflow with instant feedback and insights.",
+  keywords: ["AI Code Review", "GitHub Integration", "Developer Tools", "Code Quality", "Jetski"],
+  authors: [{ name: "Jetski Team" }],
+  openGraph: {
+    title: "Jetski - Real-Time AI Code Reviewer",
+    description: "Modern, production-grade AI code reviewer platform to streamline your development workflow with instant feedback and insights.",
+    url: "https://jetski.dev",
+    siteName: "Jetski",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jetski - Real-Time AI Code Reviewer",
+    description: "Modern, production-grade AI code reviewer platform.",
+  },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
