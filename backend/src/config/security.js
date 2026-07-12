@@ -18,18 +18,18 @@ export const helmetConfig = {
   // Prevents XSS, clickjacking, and data injection attacks.
   contentSecurityPolicy: isProduction
     ? {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Swagger UI
-          imgSrc: ["'self'", 'data:'],
-          connectSrc: ["'self'"],
-          fontSrc: ["'self'"],
-          objectSrc: ["'none'"],        // Block <object>, <embed>, <applet>
-          frameSrc: ["'none'"],          // Block iframes
-          upgradeInsecureRequests: [],   // Upgrade HTTP → HTTPS automatically
-        },
-      }
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Swagger UI
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],        // Block <object>, <embed>, <applet>
+        frameSrc: ["'none'"],          // Block iframes
+        upgradeInsecureRequests: [],   // Upgrade HTTP → HTTPS automatically
+      },
+    }
     : false, // Disabled in development to avoid blocking local tooling
 
   // Cross-Origin-Embedder-Policy: Prevents cross-origin resources from loading
@@ -75,13 +75,13 @@ export const helmetConfig = {
 export const corsConfig = {
   origin: isProduction
     ? (origin, callback) => {
-        const allowedOrigins = env.CORS_ORIGIN.split(',').map((o) => o.trim());
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
+      const allowedOrigins = env.CORS_ORIGIN.split(',').map((o) => o.trim());
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
       }
+    }
     : env.CLIENT_URL,
   credentials: true,                                         // Allow cookies/auth headers
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],       // Allowed HTTP methods
@@ -96,7 +96,7 @@ export const corsConfig = {
 export const rateLimitConfig = {
   global: {
     windowMs: 15 * 60 * 1000,                   // 15 minute window
-    max: isProduction ? 100 : 1000,              // 100/15min in prod, relaxed in dev
+    max: isProduction ? 500 : 1000,              // 500/15min in prod, relaxed in dev
     standardHeaders: true,
     legacyHeaders: false,
     message: {

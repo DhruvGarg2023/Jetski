@@ -29,12 +29,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const data = await authService.getProfile();
           setUser(data.user);
           initSocket(); // Connect socket on successful auto-login
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to restore session:', error);
-          localStorage.removeItem('token');
-          // If we are on a protected route, redirect to login
-          if (!pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password') && pathname !== '/') {
-            router.push('/login');
+          // Only log out if it's an actual authentication error (401)
+          if (error?.response?.status === 401) {
+            localStorage.removeItem('token');
+            // If we are on a protected route, redirect to login
+            if (!pathname.startsWith('/login') && !pathname.startsWith('/register') && !pathname.startsWith('/forgot-password') && pathname !== '/') {
+              router.push('/login');
+            }
           }
         }
       } else {
